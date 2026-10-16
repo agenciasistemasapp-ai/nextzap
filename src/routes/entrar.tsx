@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import { createFileRoute, redirect, useNavigate, Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
@@ -162,15 +163,7 @@ function EntrarPage() {
           </div>
 
           <div className="space-y-8 max-w-lg">
-            <div className="flex items-center gap-3">
-              <div className="size-12 rounded-2xl grid place-items-center bg-gradient-brand text-primary-foreground shadow-[0_10px_30px_-10px_rgba(22,163,74,.6)] ring-1 ring-white/20">
-                <MessageSquareText className="size-6" strokeWidth={2.4} />
-              </div>
-              <div>
-                <div className="font-display font-extrabold text-2xl text-gradient-brand leading-none">{brand.name}</div>
-                <div className="text-[12px] text-muted-foreground mt-1">{brand.tagline}</div>
-              </div>
-            </div>
+            <BrandLogo className="h-20" />
 
             <h1 className="font-display text-4xl xl:text-5xl font-extrabold leading-[1.05] tracking-tight">
               Sua IA atende o<br />
@@ -207,12 +200,7 @@ function EntrarPage() {
             <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <ArrowLeft className="size-4" /> voltar
             </Link>
-            <div className="flex items-center gap-2">
-              <div className="size-9 rounded-xl grid place-items-center bg-gradient-brand text-primary-foreground shadow-md">
-                <MessageSquareText className="size-4" />
-              </div>
-              <div className="font-display font-bold text-[15px] text-gradient-brand">{brand.name}</div>
-            </div>
+            <BrandLogo className="h-9" />
           </div>
 
           <div className="w-full max-w-md">

@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { brand } from "@/config/brand";
 import heroMockup from "@/assets/hero-desktop-pt.png";
@@ -288,12 +289,7 @@ function Header({
     <header className="lp-header sticky top-0 z-50 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-5 md:px-8 h-[4.5rem] md:h-20 flex items-center justify-between gap-3">
         <a href="/" className="flex items-center gap-2.5">
-          <span className="grid h-10 w-10 md:h-11 md:w-11 place-items-center rounded-2xl btn-glow" style={{ background: "linear-gradient(135deg,#25D366,#16a34a)" }}>
-            <Zap className="size-5 text-black" strokeWidth={2.6} />
-          </span>
-          <span className="font-brand text-[1.5rem] md:text-[1.7rem] leading-none">
-            <span className="text-white">NEXT</span><span className="text-[#25D366]">ZAP</span>
-          </span>
+          <BrandLogo className="h-12 md:h-14" />
         </a>
         <nav className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-white/70">
           <a href="#como" className="hover:text-white transition">Como funciona</a>
@@ -926,10 +922,7 @@ function Footer() {
         <div className="grid gap-10 md:gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-2xl btn-glow" style={{ background: "linear-gradient(135deg,#25D366,#16a34a)" }}>
-                <Zap className="size-4 text-black" strokeWidth={2.6} />
-              </span>
-              <span className="font-brand text-[1.4rem] leading-none"><span className="text-white">NEXT</span><span className="text-[#25D366]">ZAP</span></span>
+              <BrandLogo className="h-14" />
             </div>
             <p className="mt-4 text-sm text-white/55 leading-relaxed max-w-xs">
               IA que atende seu WhatsApp 24h, qualifica e organiza o CRM sozinha. Você só fecha.
