@@ -379,7 +379,7 @@ function Hero({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#planos",
             width={1174}
             height={831}
             loading="eager"
-            className="block w-full max-w-[600px] sm:max-w-[720px] lg:max-w-none h-auto object-contain object-center drop-shadow-2xl lg:w-[118%] lg:-mr-[9%]"
+            className="block w-full max-w-[600px] sm:max-w-[720px] lg:max-w-none h-auto object-contain object-center drop-shadow-2xl lg:w-[100%] lg:mr-0"
           />
         </div>
       </div>
