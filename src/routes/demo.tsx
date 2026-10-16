@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import { createFileRoute, Outlet, Link, useLocation } from "@tanstack/react-router";
 import { brand } from "@/config/brand";
 import {
@@ -73,14 +74,8 @@ function DemoLayout() {
 
       {/* Mobile brand bar */}
       <div className="md:hidden flex items-center gap-2.5 px-4 py-3 border-b border-[color:var(--hairline)]">
-        <div
-          className="size-8 rounded-lg grid place-items-center text-primary-foreground shrink-0"
-          style={{ background: `linear-gradient(135deg, ${PRIMARY}, var(--brand-strong))` }}
-        >
-          <Zap className="size-4" strokeWidth={2.5} />
-        </div>
         <div className="min-w-0">
-          <div className="font-display font-bold tracking-tight text-[14.5px] leading-none truncate">{brand.name}</div>
+          <BrandLogo className="h-8" />
           <div className="text-[10.5px] uppercase tracking-[0.12em] text-muted-foreground truncate mt-0.5">Demo · Clínica de Estética</div>
         </div>
       </div>
@@ -88,14 +83,8 @@ function DemoLayout() {
       <div className="flex flex-1 flex-col md:flex-row">
         <aside className="hidden md:flex w-[260px] min-h-screen border-r border-[color:var(--hairline)] bg-[color:var(--sidebar-bg)] flex-col">
           <div className="px-5 py-5 flex items-center gap-3 border-b border-[color:var(--hairline)]">
-            <div
-              className="size-10 rounded-xl grid place-items-center text-primary-foreground shadow-md ring-1 ring-[color:var(--hairline)]"
-              style={{ background: `linear-gradient(135deg, ${PRIMARY}, var(--brand-strong))` }}
-            >
-              <Zap className="size-5" strokeWidth={2.5} />
-            </div>
             <div className="min-w-0">
-              <div className="font-display font-extrabold tracking-tight truncate text-[16px]">{brand.name}</div>
+              <BrandLogo className="h-10" />
               <div className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground truncate -mt-0.5">DEMO · Clínica Vitalis</div>
             </div>
           </div>

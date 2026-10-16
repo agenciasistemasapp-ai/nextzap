@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 import {
@@ -101,18 +102,8 @@ export function AppShell({
       {/* Mobile top bar */}
       <header className="md:hidden sticky top-0 z-30 flex items-center justify-between gap-3 px-4 py-3 bg-[color:var(--panel)]/80 backdrop-blur-xl border-b border-[color:var(--hairline)]">
         <div className="flex items-center gap-2.5 min-w-0">
-          {company?.logo_url ? (
-            <img src={company.logo_url} alt={company.nome} className="size-8 rounded-lg object-cover ring-1 ring-[color:var(--hairline)]" />
-          ) : (
-            <div
-              className="size-8 rounded-lg grid place-items-center text-primary-foreground shrink-0"
-              style={{ background: `linear-gradient(135deg, ${primary}, var(--brand-strong))` }}
-            >
-              <Zap className="size-4" strokeWidth={2.5} />
-            </div>
-          )}
           <div className="min-w-0">
-            <div className="font-display font-bold tracking-tight text-[14.5px] leading-none truncate">{brand.name}</div>
+            <BrandLogo className="h-8" />
             <div className="text-[10.5px] text-muted-foreground truncate mt-0.5">{company?.nome || "Sua empresa"}</div>
           </div>
         </div>
@@ -169,18 +160,8 @@ function Sidebar({
   return (
     <aside className="hidden md:flex w-[260px] min-h-screen border-r border-[color:var(--hairline)] bg-[color:var(--sidebar-bg)] flex-col">
       <div className="px-5 py-5 flex items-center gap-3 border-b border-[color:var(--hairline)]">
-        {company?.logo_url ? (
-          <img src={company.logo_url} alt={company.nome} className="size-10 rounded-xl object-cover ring-1 ring-[color:var(--hairline)]" />
-        ) : (
-          <div
-            className="size-10 rounded-xl grid place-items-center text-primary-foreground shadow-md ring-1 ring-[color:var(--hairline)]"
-            style={{ background: `linear-gradient(135deg, ${primary}, var(--brand-strong))` }}
-          >
-            <Zap className="size-5" strokeWidth={2.5} />
-          </div>
-        )}
         <div className="min-w-0">
-          <div className="font-display font-extrabold tracking-tight truncate text-[16px]">{brand.name}</div>
+          <BrandLogo className="h-10" />
           <div className="text-[11.5px] text-muted-foreground truncate -mt-0.5">{company?.nome || "Sua empresa"}</div>
         </div>
       </div>
