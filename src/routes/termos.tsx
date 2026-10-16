@@ -3,8 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/termos")({
   head: () => ({
     meta: [
-      { title: "Termos e Condições — ATENDE ZAP" },
-      { name: "description", content: "Termos e Condições de uso do ATENDE ZAP." },
+      { title: "Termos e Condições — NEXTZAP" },
+      { name: "description", content: "Termos e Condições de uso do NEXTZAP." },
     ],
   }),
   component: TermosPage,
@@ -22,8 +22,8 @@ function TermosPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">1. Quem somos</h2>
             <p className="mt-2">
-              Estes Termos regulam o uso do serviço ATENDE ZAP ("Serviço"), fornecido por
-              <strong> ATENDE ZAP</strong> ("nós", "nosso"). Ao usar o Serviço, você concorda com
+              Estes Termos regulam o uso do serviço NEXTZAP ("Serviço"), fornecido por
+              <strong> NEXTZAP</strong> ("nós", "nosso"). Ao usar o Serviço, você concorda com
               estes Termos. Se não concordar, não utilize o Serviço.
             </p>
           </section>
@@ -40,7 +40,7 @@ function TermosPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">3. Descrição do Serviço</h2>
             <p className="mt-2">
-              O ATENDE ZAP oferece automação e gestão de atendimento via WhatsApp, incluindo
+              O NEXTZAP oferece automação e gestão de atendimento via WhatsApp, incluindo
               recursos de mensageria, fluxos automatizados e integrações.
             </p>
           </section>
@@ -61,7 +61,7 @@ function TermosPage() {
             <h2 className="text-xl font-semibold text-slate-900">5. Propriedade intelectual</h2>
             <p className="mt-2">
               Todo o software, marca, documentação e materiais do Serviço são de propriedade
-              do ATENDE ZAP. Concedemos a você uma licença limitada, não exclusiva e
+              do NEXTZAP. Concedemos a você uma licença limitada, não exclusiva e
               intransferível para usar o Serviço conforme o plano contratado.
             </p>
           </section>
@@ -121,7 +121,7 @@ function TermosPage() {
             <h2 className="text-xl font-semibold text-slate-900">11. Lei aplicável</h2>
             <p className="mt-2">
               Estes Termos são regidos pelas leis do Brasil. Fica eleito o foro do domicílio
-              do ATENDE ZAP para dirimir controvérsias, salvo disposição legal em contrário.
+              do NEXTZAP para dirimir controvérsias, salvo disposição legal em contrário.
             </p>
           </section>
 
