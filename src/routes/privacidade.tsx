@@ -3,8 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacidade")({
   head: () => ({
     meta: [
-      { title: "Política de Privacidade — ATENDE ZAP" },
-      { name: "description", content: "Como o ATENDE ZAP coleta, usa e protege seus dados." },
+      { title: "Política de Privacidade — NEXTZAP" },
+      { name: "description", content: "Como o NEXTZAP coleta, usa e protege seus dados." },
     ],
   }),
   component: PrivacidadePage,
@@ -22,7 +22,7 @@ function PrivacidadePage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">1. Controlador dos dados</h2>
             <p className="mt-2">
-              <strong>ATENDE ZAP</strong> atua como controlador dos dados pessoais tratados
+              <strong>NEXTZAP</strong> atua como controlador dos dados pessoais tratados
               no âmbito do Serviço, conforme a LGPD (Lei nº 13.709/2018) e demais leis
               aplicáveis.
             </p>

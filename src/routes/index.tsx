@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Conecte seu número de WhatsApp em 2 minutos. A IA do AtendeZap responde, qualifica e move cada lead no funil automaticamente. 3 dias grátis para testar.",
+          "Conecte seu número de WhatsApp em 2 minutos. A IA da NextZap responde, qualifica e move cada lead no funil automaticamente. 3 dias grátis para testar.",
       },
       { property: "og:title", content: `${brand.name} — WhatsApp + IA + CRM no automático` },
       {
@@ -338,13 +338,13 @@ function Hero({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#planos",
             <span className="text-white/80 font-semibold">WhatsApp + IA + CRM no automático</span>
           </div>
 
-          <h1 className="font-display text-[clamp(3rem,10vw,7rem)] leading-[0.92] mt-6 tracking-tight font-black">
-            Sua IA atende o WhatsApp <span className="text-grad">24h</span> e organiza o CRM <span className="text-grad">sozinha</span>.
+          <h1 className="font-display text-[clamp(2rem,4.6vw,3.6rem)] leading-[1.05] mt-6 tracking-tight font-black">
+            Transforme seu WhatsApp em uma central inteligente de atendimento e vendas, com IA trabalhando <span className="text-grad">24 horas por dia, 7 dias por semana</span>.
           </h1>
 
           <p className="mt-6 text-[17px] sm:text-xl text-white/70 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-            Conecte seu número, treine o agente em uma tela e veja cada lead ser respondido na hora,
-            qualificado e movido no funil — sem você levantar o dedo.
+            Centralize conversas, automatize atendimentos, gerencie seus clientes e acompanhe suas
+            oportunidades em uma única plataforma com Inteligência Artificial, CRM e automações.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row flex-wrap gap-3 justify-center lg:justify-start">
@@ -353,7 +353,7 @@ function Hero({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#planos",
               className="group inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl text-black font-bold text-[16px] btn-glow"
               style={{ background: "linear-gradient(135deg,#25D366,#16a34a)" }}
             >
-              Começar 3 dias grátis
+              QUERO CONHECER A NEXTZAP
               <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
             </button>
             <button
@@ -407,7 +407,7 @@ function PhoneMock() {
               A
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold truncate">AtendeZap • IA</div>
+              <div className="text-sm font-semibold truncate">{brand.name} • IA</div>
               <div className="text-[10px] text-[#25D366] flex items-center gap-1.5">
                 <span className="size-1.5 rounded-full bg-[#25D366]" /> online agora
               </div>
@@ -521,7 +521,7 @@ function Pain() {
         </h2>
         <p className="mt-6 text-lg md:text-xl text-white/65 leading-relaxed">
           A primeira empresa a responder vende. Sempre. Enquanto você está dirigindo, atendendo na loja
-          ou dormindo, os leads do anúncio que você pagou estão sumindo na fila. O AtendeZap responde
+          ou dormindo, os leads do anúncio que você pagou estão sumindo na fila. A NextZap responde
           em segundos, qualifica e já te entrega o lead pronto pra fechar.
         </p>
       </div>

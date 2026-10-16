@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/reembolso")({
   head: () => ({
     meta: [
-      { title: "Política de Reembolso — ATENDE ZAP" },
+      { title: "Política de Reembolso — NEXTZAP" },
       { name: "description", content: "Garantia de 30 dias. Saiba como solicitar reembolso." },
     ],
   }),
@@ -22,7 +22,7 @@ function ReembolsoPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">Garantia de 30 dias</h2>
             <p className="mt-2">
-              O <strong>ATENDE ZAP</strong> oferece uma garantia de satisfação de
+              O <strong>NEXTZAP</strong> oferece uma garantia de satisfação de
               <strong> 30 dias</strong>. Se você não estiver satisfeito com sua compra, pode
               solicitar reembolso integral em até 30 dias a partir da data do pedido.
             </p>
