@@ -373,9 +373,9 @@ function Hero({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#planos",
           <img
             src={heroMockup}
             alt="Computador e celular mostrando o painel de atendimento e uma conversa no WhatsApp"
-            width={1200}
-            height={896}
-            loading="eager"
+            width={1400}
+            height={1045}
+            loading="eager" decoding="async" fetchPriority="high"
             className="block w-full max-w-[600px] sm:max-w-[720px] lg:max-w-none h-auto object-contain object-center drop-shadow-2xl lg:w-[100%] lg:mr-0"
           />
         </div>
