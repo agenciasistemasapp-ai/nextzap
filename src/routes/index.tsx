@@ -1,7 +1,7 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { brand } from "@/config/brand";
-import heroMockup from "@/assets/hero-desktop-pt-v5.png";
+import heroMockup from "@/assets/hero-desktop.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
