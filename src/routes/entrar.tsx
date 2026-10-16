@@ -163,7 +163,7 @@ function EntrarPage() {
           </div>
 
           <div className="space-y-8 max-w-lg">
-            <BrandLogo className="h-20" />
+            <BrandLogo className="h-28" />
 
             <h1 className="font-display text-4xl xl:text-5xl font-extrabold leading-[1.05] tracking-tight">
               Sua IA atende o<br />
@@ -200,7 +200,7 @@ function EntrarPage() {
             <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
               <ArrowLeft className="size-4" /> voltar
             </Link>
-            <BrandLogo className="h-9" />
+            <BrandLogo className="h-12" />
           </div>
 
           <div className="w-full max-w-md">
