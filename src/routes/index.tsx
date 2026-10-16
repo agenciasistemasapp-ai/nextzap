@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { brand } from "@/config/brand";
-import heroMockup from "@/assets/nextzap-hero.png.asset.json";
+import heroMockup from "@/assets/nextzap-hero-v2.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
@@ -374,7 +374,7 @@ function Hero({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#planos",
 
         <div className="relative flex justify-center lg:justify-end min-w-0">
           <img
-            src={heroMockup.url}
+            src={heroMockup}
             alt="NEXTZAP — dashboard e atendimento com IA no WhatsApp"
             width={1024}
             height={1536}
