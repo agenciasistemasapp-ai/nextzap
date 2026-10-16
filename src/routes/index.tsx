@@ -375,11 +375,11 @@ function Hero({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#planos",
         <div className="relative flex justify-center lg:justify-end min-w-0">
           <img
             src={heroMockup}
-            alt="NEXTZAP — dashboard e atendimento com IA no WhatsApp"
-            width={1024}
-            height={1536}
+            alt="Computador e celular mostrando o painel de atendimento e uma conversa no WhatsApp"
+            width={1536}
+            height={1152}
             loading="eager"
-            className="block w-full max-w-[380px] sm:max-w-[480px] lg:max-w-[640px] h-auto max-h-[95vh] object-contain object-center lg:scale-110 origin-center"
+            className="block w-full max-w-[520px] sm:max-w-[600px] lg:max-w-none h-auto object-contain object-center drop-shadow-2xl"
           />
         </div>
       </div>
