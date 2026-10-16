@@ -42,7 +42,9 @@ async function evo<T = any>(
     data = { raw: text };
   }
   if (!res.ok) {
-    const msg = data?.message || data?.error || text || `HTTP ${res.status}`;
+    const inner = data?.response?.message ?? data?.message;
+    const innerText = Array.isArray(inner) ? inner.map((m: any) => (typeof m === "string" ? m : JSON.stringify(m))).join("; ") : inner;
+    const msg = innerText || data?.error || text || `HTTP ${res.status}`;
     throw new Error(`Evolution API: ${msg}.${SUPPORT_SUFFIX}`);
   }
   return data as T;
