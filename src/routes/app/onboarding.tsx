@@ -87,7 +87,7 @@ function Onboarding() {
   useEffect(() => {
     if (!ctx.company) return;
     const c = ctx.company;
-    if (c.tipo_pessoa) setTipoPessoa(c.tipo_pessoa as any);
+    if (c.tipo_pessoa) setTipoPessoa(String(c.tipo_pessoa).toLowerCase() as any);
     if (c.cnpj_cpf) setCnpjCpf(c.cnpj_cpf);
     if (c.razao_social) setRazaoSocial(c.razao_social);
     if (c.nome_fantasia) setNomeFantasia(c.nome_fantasia);
@@ -120,7 +120,7 @@ function Onboarding() {
 
   async function persistPartial(nextStep: number) {
     const patch: any = {
-      tipo_pessoa: tipoPessoa,
+      tipo_pessoa: tipoPessoa.toUpperCase(),
       cnpj_cpf: cnpjCpf || null,
       razao_social: razaoSocial || null,
       nome_fantasia: nomeFantasia || null,
