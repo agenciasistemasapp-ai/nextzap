@@ -95,6 +95,7 @@ function Landing() {
         <Pain />
         <HowItWorks />
         <Features />
+        <SocialProof />
         <Pricing onCta={cta} />
         <Testimonials />
         <Faq />
@@ -494,6 +495,86 @@ function Bubble({ children, side, delay }: { children: React.ReactNode; side: "l
         {children}
       </div>
     </div>
+  );
+}
+
+/* ===================== SOCIAL PROOF (contadores animados) ===================== */
+function CountUp({ to, prefix = "", suffix = "", decimals = 0 }: { to: number; prefix?: string; suffix?: string; decimals?: number }) {
+  const [val, setVal] = useState(0);
+  const [el, setEl] = useState<HTMLSpanElement | null>(null);
+  useEffect(() => {
+    if (!el) return;
+    let raf = 0;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      const start = performance.now();
+      const dur = 1800;
+      const tick = (t: number) => {
+        const p = Math.min(1, (t - start) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        setVal(to * eased);
+        if (p < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, { threshold: 0.3 });
+    io.observe(el);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
+  }, [el, to]);
+  return (
+    <span ref={setEl} className="tabular-nums">
+      {prefix}{val.toLocaleString("pt-BR", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}{suffix}
+    </span>
+  );
+}
+
+function SocialProof() {
+  const items = [
+    { to: 1237, prefix: "+ de ", suffix: "", l: "usuários ativos", icon: Users },
+    { to: 2.4, prefix: "+ de ", suffix: " mi", l: "mensagens respondidas pela IA", icon: MessageSquareText, decimals: 1 },
+    { to: 98, prefix: "", suffix: "%", l: "de clientes satisfeitos", icon: Star },
+    { to: 312, prefix: "+ de ", suffix: "", l: "empresas atendendo 24h", icon: Bot },
+  ];
+  return (
+    <section className="px-5 md:px-8 py-20 md:py-24">
+      <div className="mx-auto max-w-6xl text-center reveal" data-reveal>
+        <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 text-[12px] font-semibold text-white/80">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-75 animate-ping" />
+            <span className="relative inline-flex size-2 rounded-full bg-[#25D366]" />
+          </span>
+          Crescendo todos os dias
+        </div>
+        <h2 className="font-display text-3xl md:text-5xl mt-5">
+          Quem usa a <span className="text-grad">{brand.name}</span> não volta atrás
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+          {items.map((it, i) => {
+            const Icon = it.icon;
+            return (
+              <div
+                key={it.l}
+                className="glass rounded-3xl px-5 py-8 transition-transform duration-300 hover:-translate-y-1 lp-float"
+                style={{ animationDelay: `${i * 0.4}s` }}
+              >
+                <div className="mx-auto grid place-items-center size-11 rounded-2xl bg-[#25D366]/15 text-[#25D366]">
+                  <Icon className="size-5" />
+                </div>
+                <div className="font-display text-3xl md:text-4xl text-grad mt-4">
+                  <CountUp to={it.to} prefix={it.prefix} suffix={it.suffix} decimals={it.decimals ?? 0} />
+                </div>
+                <div className="text-[11px] uppercase tracking-[0.16em] text-white/55 mt-2 font-semibold">{it.l}</div>
+              </div>
+            );
+          })}
+        </div>
+        <style>{`
+          @keyframes lpFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+          .lp-float { animation: lpFloat 4s ease-in-out infinite; }
+          @media (prefers-reduced-motion: reduce) { .lp-float { animation: none; } }
+        `}</style>
+      </div>
+    </section>
   );
 }
 
