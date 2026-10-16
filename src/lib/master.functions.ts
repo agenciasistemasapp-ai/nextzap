@@ -191,9 +191,16 @@ export const createCompanyWithOwner = createServerFn({ method: "POST" })
     }
     const trialMs = data.trialDays * 86400000;
     const trialEnd = new Date(Date.now() + trialMs).toISOString();
+    let selectedPlanSlug: string | null = null;
+    if (data.planId) {
+      const { data: pl } = await supabaseAdmin.from("plan").select("slug").eq("id", data.planId).maybeSingle();
+      selectedPlanSlug = pl?.slug ?? null;
+    }
+
     const { data: comp, error: cErr } = await supabaseAdmin
       .from("company")
       .insert({
+        selected_plan_slug: selectedPlanSlug,
         nome: data.nome,
         slug,
         created_by: ownerId,

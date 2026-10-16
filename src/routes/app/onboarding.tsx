@@ -141,7 +141,8 @@ function Onboarding() {
       logo_url: logoUrl || null,
       onboarding_step: nextStep,
     };
-    await supabase.from("company").update(patch).eq("id", companyId);
+    const { error } = await supabase.from("company").update(patch).eq("id", companyId);
+    if (error) throw new Error("Não foi possível salvar esta etapa: " + error.message);
   }
 
   function validateStep(): string | null {
@@ -179,17 +180,19 @@ function Onboarding() {
       await persistPartial(STEPS.length - 1);
 
       // Upsert agente (PK = company_id)
-      await supabase.from("agent_config").upsert({
+      const { error: agErr } = await supabase.from("agent_config").upsert({
         company_id: companyId,
         user_id: ctx.user.id,
         nome_empresa: nomeFantasia.trim(),
         ...agente,
       }, { onConflict: "company_id" });
+      if (agErr) throw new Error("Não foi possível salvar o agente: " + agErr.message);
 
-      await supabase.from("company").update({
+      const { error: doneErr } = await supabase.from("company").update({
         onboarding_completed: true,
         nome: nomeFantasia.trim(),
       }).eq("id", companyId);
+      if (doneErr) throw new Error("Não foi possível concluir o cadastro: " + doneErr.message);
 
       toast.success("Tudo pronto! Bem-vindo ao " + brand.name);
       window.location.href = "/app/dashboard";
