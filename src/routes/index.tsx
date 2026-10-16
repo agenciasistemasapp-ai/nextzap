@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { brand } from "@/config/brand";
-import heroMockup from "@/assets/hero-devices-pt.png";
+import heroMockup from "@/assets/hero-desktop-pt.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
