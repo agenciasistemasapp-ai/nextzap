@@ -289,7 +289,7 @@ function Header({
     <header className="lp-header sticky top-0 z-50 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-5 md:px-8 h-[4.5rem] md:h-20 flex items-center justify-between gap-3">
         <a href="/" className="flex items-center gap-2.5">
-          <BrandLogo className="h-12 md:h-14" />
+          <BrandLogo className="h-16 md:h-20" />
         </a>
         <nav className="hidden md:flex items-center gap-8 text-[15px] font-semibold text-white/70">
           <a href="#como" className="hover:text-white transition">Como funciona</a>
@@ -922,7 +922,7 @@ function Footer() {
         <div className="grid gap-10 md:gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-3">
-              <BrandLogo className="h-14" />
+              <BrandLogo className="h-20" />
             </div>
             <p className="mt-4 text-sm text-white/55 leading-relaxed max-w-xs">
               IA que atende seu WhatsApp 24h, qualifica e organiza o CRM sozinha. Você só fecha.
