@@ -99,15 +99,15 @@ function CheckoutPage() {
   const hasCompany = !!ctx.company;
   const trialActive =
     hasCompany && ctx.company!.status_cobranca === "trial" && trialDaysLeft(ctx.company!.trial_ate) > 0;
-  const paywallMode = hasCompany && !trialActive && ctx.company!.status_cobranca !== "ativo";
+  const paywallMode = hasCompany && ctx.company!.status_cobranca !== "ativo";
 
   // Empresa ativa ou em trial ainda válido → não deveria estar aqui
   useEffect(() => {
     if (!ctx.company) return;
-    if (ctx.company.status_cobranca === "ativo" || trialActive) {
+    if (ctx.company.status_cobranca === "ativo") {
       navigate({ to: ctx.company.onboarding_completed ? "/app/dashboard" : "/app/onboarding", replace: true });
     }
-  }, [ctx.company, navigate, trialActive]);
+  }, [ctx.company, navigate]);
 
   useEffect(() => {
     supabase.from("plan").select("*").eq("ativo", true).order("ordem").then(({ data }) => {
@@ -177,6 +177,7 @@ function CheckoutPage() {
   const headerTitle = paywallMode
     ? "Ative seu plano para continuar"
     : "Comece grátis em segundos";
+  void trialActive;
   const headerSubtitle = paywallMode
     ? "Seus dados ficam aqui esperando. Assim que o pagamento for confirmado, seu acesso é liberado automaticamente."
     : "Escolha um plano para começar. Você não precisa pagar agora — só vai cobrar no final do período de teste, se quiser continuar.";
