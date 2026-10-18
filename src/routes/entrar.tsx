@@ -17,6 +17,8 @@ import {
   Zap,
   ArrowLeft,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { brand } from "@/config/brand";
 
@@ -56,10 +58,11 @@ function genStrongPassword() {
 function EntrarPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/entrar" }) as Search;
-  const [email, setEmail] = useState("");
+  const [rawEmail, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [needsPassword, setNeedsPassword] = useState(search.modo === "login");
   const [loading, setLoading] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
 
   const planInfo = search.plano ? PLAN_LABEL[search.plano] : null;
 
@@ -81,6 +84,7 @@ function EntrarPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const email = rawEmail.trim().toLowerCase();
     const v = emailSchema.safeParse(email);
     if (!v.success) return toast.error(v.error.issues[0].message);
     setLoading(true);
@@ -88,7 +92,11 @@ function EntrarPage() {
     if (needsPassword) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
-      if (error) return toast.error("Senha incorreta. Tente novamente ou recupere sua senha.");
+      if (error) {
+        const m = (error.message || "").toLowerCase();
+        if (m.includes("confirm")) return toast.error("Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada.");
+        return toast.error("E-mail ou senha incorretos. Confira e tente de novo ou recupere sua senha.");
+      }
       toast.success("Bem-vindo de volta!");
       return routeAfterAuth();
     }
@@ -246,8 +254,9 @@ function EntrarPage() {
                     <Input
                       id="email"
                       type="email"
-                      value={email}
-                      onChange={(e) => { setEmail(e.target.value); if (needsPassword) setNeedsPassword(false); }}
+                      value={rawEmail}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
                       required
                       autoFocus
                       placeholder="voce@empresa.com"
@@ -263,7 +272,12 @@ function EntrarPage() {
                           Esqueci minha senha
                         </Link>
                       </div>
-                      <Input id="pwd" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus required className="h-11" />
+                      <div className="relative">
+                        <Input id="pwd" type={showPwd ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required className="h-11 pr-11" />
+                        <button type="button" onClick={() => setShowPwd((v) => !v)} aria-label={showPwd ? "Ocultar senha" : "Mostrar senha"} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-foreground">
+                          {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -276,6 +290,10 @@ function EntrarPage() {
                     {loading && <Loader2 className="size-4 mr-2 animate-spin" />}
                     {needsPassword ? "Entrar e continuar" : planInfo ? "Continuar para o pagamento" : "Criar conta grátis"}
                   </Button>
+
+                  <button type="button" onClick={() => setNeedsPassword((v) => !v)} className="w-full text-[12.5px] font-medium text-muted-foreground hover:text-foreground">
+                    {needsPassword ? "Não tenho conta — criar agora" : "Já tenho conta — entrar com senha"}
+                  </button>
 
                   {!needsPassword && (
                     <p className="text-[11.5px] text-muted-foreground text-center pt-1 leading-relaxed">
