@@ -336,7 +336,7 @@ function Hero({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#planos",
             <span className="text-white/80 font-semibold">WhatsApp + IA + CRM no automático</span>
           </div>
 
-          <h1 className="font-display text-[clamp(2rem,4.6vw,3.6rem)] leading-[1.05] mt-6 tracking-tight font-black">
+          <h1 className="font-display text-[clamp(1.9rem,4.2vw,3.1rem)] leading-[1.12] mt-6 tracking-tight font-extrabold">
             Transforme seu WhatsApp em uma central inteligente de atendimento e vendas, com IA trabalhando <span className="text-grad">24 horas por dia, 7 dias por semana</span>.
           </h1>
 
@@ -541,7 +541,7 @@ function SocialProof() {
           </span>
           Crescendo todos os dias
         </div>
-        <h2 className="font-display text-3xl md:text-5xl mt-5">
+        <h2 className="font-display text-[28px] md:text-[38px] font-bold leading-[1.15] mt-5">
           Quem usa a <span className="text-grad">{brand.name}</span> não volta atrás
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
@@ -601,7 +601,7 @@ function Pain() {
   return (
     <section className="px-5 md:px-8 py-24 md:py-28">
       <div className="mx-auto max-w-3xl text-center reveal" data-reveal>
-        <h2 className="font-display text-4xl md:text-6xl leading-[1.02] tracking-tight">
+        <h2 className="font-display text-[28px] md:text-[40px] font-bold leading-[1.15] tracking-tight">
           Lead que espera, lead que <span className="text-grad">compra do concorrente</span>.
         </h2>
         <p className="mt-6 text-lg md:text-xl text-white/65 leading-relaxed">
@@ -890,7 +890,7 @@ function FinalCta({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#plan
 
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 size-[500px] rounded-full opacity-40 blur-3xl" style={{ background: "radial-gradient(circle,#25D366,transparent 60%)" }} />
         <div className="relative">
-          <h2 className="font-display text-4xl sm:text-5xl md:text-7xl leading-[0.98] tracking-tight">
+          <h2 className="font-display text-[30px] md:text-[40px] font-bold leading-[1.15] tracking-tight">
             Pare de perder venda no <span className="text-grad">"oi, sumiu"</span>.
           </h2>
           <p className="mt-6 text-white/70 max-w-xl mx-auto text-lg sm:text-xl">
@@ -973,7 +973,7 @@ function SectionTitle({ eyebrow, title }: { eyebrow: string; title: React.ReactN
         {eyebrow}
         <span className="h-px w-10 bg-[#25D366]/60" />
       </div>
-      <h2 className="font-display text-5xl md:text-7xl font-black leading-[0.98] tracking-tight mt-5 max-w-4xl mx-auto">
+      <h2 className="font-display text-[30px] md:text-[40px] font-bold leading-[1.15] tracking-tight mt-5 max-w-4xl mx-auto">
         {title}
       </h2>
     </div>
