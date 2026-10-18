@@ -1,6 +1,6 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { brand } from "@/config/brand";
+import { brand, supportWhatsappUrl } from "@/config/brand";
 import heroMockup from "@/assets/hero-desktop.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -941,8 +941,8 @@ function Footer() {
             <div className="text-xs uppercase tracking-[0.2em] text-white/45 font-bold">Empresa</div>
             <ul className="mt-4 space-y-2.5 text-sm text-white/65">
               <li><a href="#faq" className="hover:text-white">Dúvidas</a></li>
-              <li><a href="#" className="hover:text-white">Contato</a></li>
-              <li><a href="#" className="hover:text-white">Suporte</a></li>
+              <li><a href={`${supportWhatsappUrl}?text=${encodeURIComponent("Olá! Quero conhecer a NextZap.")}`} target="_blank" rel="noopener noreferrer" className="hover:text-white">Contato</a></li>
+              <li><a href={`${supportWhatsappUrl}?text=${encodeURIComponent("Olá! Preciso de suporte com a NextZap.")}`} target="_blank" rel="noopener noreferrer" className="hover:text-white">Suporte</a></li>
             </ul>
           </div>
           <div>
