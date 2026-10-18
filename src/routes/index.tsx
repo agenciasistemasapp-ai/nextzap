@@ -106,14 +106,12 @@ function Landing() {
 
       <style>{`
         html { scroll-behavior: smooth; }
-        .lp-root { font-family: 'Montserrat', system-ui, sans-serif; }
-        .font-display { font-family: 'Montserrat', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.025em; }
-        .font-brand { font-family: 'Montserrat', system-ui, sans-serif; font-weight: 900; letter-spacing: -0.04em; }
+        .lp-root { font-family: 'Inter', system-ui, sans-serif; }
+        .font-display { font-family: 'Sora', system-ui, sans-serif; letter-spacing: -0.02em; }
+        .font-brand { font-family: 'Sora', system-ui, sans-serif; font-weight: 800; letter-spacing: -0.03em; }
         .text-grad {
-          background: linear-gradient(95deg, #25D366 0%, #a3e635 45%, #22d3ee 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
+          background: none;
+          color: #39E879;
         }
         .btn-glow {
           box-shadow: 0 10px 30px -12px rgba(37,211,102,0.55), 0 0 0 1px rgba(37,211,102,0.35) inset;
