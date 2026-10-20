@@ -362,6 +362,7 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
               );
               if (acaoMsg) finalParts = [acaoMsg];
               else if (looksLikeBookingConfirmation(finalParts.join(" "))) finalParts = [MSG.pedirConfirmacao()];
+              else if (!finalParts.length) finalParts = [MSG.pedirConfirmacao()];
             } catch (e: any) {
               console.error("[agenda.acao]", e?.message);
               const { MSG } = await import("@/lib/scheduling");
