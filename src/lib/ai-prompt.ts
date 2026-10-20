@@ -188,8 +188,11 @@ export function buildSystemPrompt(
     produtos?: ProdutoBrief[];
     stages?: StageBrief[];
     googleConectado?: boolean;
+    /** Bloco de agenda real (horários verificados). Quando presente, o backend é quem confirma reservas. */
+    agendamento?: string;
   },
 ): string {
+  const agendaReal = !!opts?.agendamento;
   const partes = opts?.responderEmPartes ?? c.responder_em_partes ?? true;
   const stages = (opts?.stages && opts.stages.length > 0) ? opts.stages : DEFAULT_STAGES;
   const produtos = opts?.produtos ?? [];
@@ -241,7 +244,8 @@ export function buildSystemPrompt(
     c.reativar_cliente ? "Pode reativar clientes inativos com mensagens leves e relevantes." : "",
     c.pode_fazer ? `O QUE VOCÊ PODE FAZER:\n${c.pode_fazer}` : "",
     c.nao_pode_fazer ? `O QUE VOCÊ NÃO PODE FAZER:\n${c.nao_pode_fazer}` : "",
-    c.agendamento_ativo
+    agendaReal ? opts!.agendamento! : "",
+    c.agendamento_ativo && !agendaReal
       ? `AGENDAMENTO ATIVO: você pode propor horários para ${c.servicos_agendaveis || "os serviços agendáveis"}. ` +
         `Duração padrão: ${c.duracao_padrao || "30 min"}. ` +
         `Janelas disponíveis: ${c.horarios_disponiveis || "(não informado)"}. ` +
@@ -261,7 +265,9 @@ export function buildSystemPrompt(
 5. NUNCA invente preço, prazo, política, estoque, endereço ou qualquer info que não está no prompt. Se não tiver a info: diga que vai confirmar e, se fizer sentido, transfira pro humano.
 6. Conduza pro próximo passo concreto: agendar, enviar proposta, confirmar pedido, marcar visita, etc.
 7. Respeite SEMPRE o que está em "NÃO pode fazer".
-8. NUNCA prometa enviar algo depois ("vou te mandar a confirmação", "você receberá em breve", "o sistema envia automaticamente"). Você só consegue responder quando o cliente escreve; não existe envio automático posterior. Ao fechar um agendamento ou pedido, ENVIE A CONFIRMAÇÃO COMPLETA NA MESMA RESPOSTA: serviço, nome, dia da semana + data, horário e, se houver no prompt, endereço e valor. Ex.: "Prontinho, confirmado! Corte infantil para Samuel, terça (21/10) às 10h10. Te esperamos!"
+${agendaReal
+  ? `8. NUNCA prometa enviar algo depois ("vou te mandar a confirmação", "você receberá em breve"). Agendamentos: NUNCA confirme você mesmo — use o marcador [AGENDAR] e o sistema envia a confirmação real ao cliente. Pedidos que não são agendamento: envie o resumo completo na mesma resposta.`
+  : `8. NUNCA prometa enviar algo depois ("vou te mandar a confirmação", "você receberá em breve", "o sistema envia automaticamente"). Você só consegue responder quando o cliente escreve; não existe envio automático posterior. Ao fechar um agendamento ou pedido, ENVIE A CONFIRMAÇÃO COMPLETA NA MESMA RESPOSTA: serviço, nome, dia da semana + data, horário e, se houver no prompt, endereço e valor. Ex.: "Prontinho, confirmado! Corte infantil para Samuel, terça (21/10) às 10h10. Te esperamos!"`}
 
 ESTILO DE MENSAGEM (WhatsApp humano):
 - Português do Brasil, tom próximo, sem ser formal demais e sem ser infantil.
@@ -283,7 +289,7 @@ Se uma frase só já resolve, use UMA parte e pronto (sem o marcador). Nunca mai
     blocos.push(`FORMATO DA RESPOSTA: uma mensagem só, curta e natural.`);
   }
 
-  if (c.agendamento_ativo && opts?.googleConectado) {
+  if (c.agendamento_ativo && opts?.googleConectado && !agendaReal) {
     const nowIso = new Date().toISOString();
     blocos.push(
       `AGENDAMENTO REAL (Google Agenda conectado):
@@ -309,28 +315,62 @@ Escolha 1 entre as etapas reais do CRM da empresa listadas acima. ` +
   return blocos.filter(Boolean).join("\n\n");
 }
 
-export interface AgendarBrief { inicio: string; fim: string; titulo: string; }
+export interface AgendarBrief {
+  inicio: string;
+  /** Formato antigo [AGENDAR: início | fim | título] */
+  fim?: string | null;
+  titulo: string;
+  servico?: string | null;
+  nome?: string | null;
+}
+
+const DT_RE = /^\d{4}-\d{2}-\d{2}[T ]\d{1,2}:\d{2}/;
 
 export function parseAiOutput(
   raw: string,
   stages?: StageBrief[],
-): { parts: string[]; stage: string | null; agendar: AgendarBrief | null } {
+): {
+  parts: string[];
+  stage: string | null;
+  agendar: AgendarBrief | null;
+  remarcar: { inicio: string } | null;
+  cancelar: boolean;
+} {
   let text = raw || "";
   let stage: string | null = null;
   let agendar: AgendarBrief | null = null;
+  let remarcar: { inicio: string } | null = null;
+  let cancelar = false;
 
   const agMatch = text.match(/\[\s*AGENDAR\s*:\s*([^\]]+)\]/i);
   if (agMatch) {
     const parts = agMatch[1].split("|").map((s) => s.trim());
-    if (parts.length >= 2) {
-      agendar = {
-        inicio: parts[0],
-        fim: parts[1],
-        titulo: (parts[2] || "Agendamento").slice(0, 120),
-      };
+    if (parts.length >= 1 && DT_RE.test(parts[0])) {
+      if (parts[1] && DT_RE.test(parts[1])) {
+        agendar = { inicio: parts[0], fim: parts[1], titulo: (parts[2] || "Agendamento").slice(0, 120), servico: parts[2] || null, nome: null };
+      } else {
+        agendar = {
+          inicio: parts[0],
+          fim: null,
+          servico: (parts[1] || "").slice(0, 80) || null,
+          nome: (parts[2] || "").slice(0, 80) || null,
+          titulo: (parts[1] || "Agendamento").slice(0, 120),
+        };
+      }
     }
-    text = text.replace(agMatch[0], "").trim();
   }
+  const reMatch = text.match(/\[\s*REMARCAR\s*:\s*([^\]]+)\]/i);
+  if (reMatch) {
+    const v = reMatch[1].split("|")[0].trim();
+    if (DT_RE.test(v)) remarcar = { inicio: v };
+  }
+  if (/\[\s*CANCELAR_AGENDAMENTO\s*\]/i.test(text)) cancelar = true;
+  // Remove todos os marcadores internos (inclusive repetidos) para nunca vazarem ao cliente.
+  text = text
+    .replace(/\[\s*AGENDAR\s*:[^\]]*\]/gi, "")
+    .replace(/\[\s*REMARCAR\s*:[^\]]*\]/gi, "")
+    .replace(/\[\s*CANCELAR_AGENDAMENTO\s*\]/gi, "")
+    .trim();
 
   const stageMatch = text.match(/\[\s*ESTAGIO\s*:\s*([^\]]+)\]/i);
   if (stageMatch) {
@@ -352,7 +392,7 @@ export function parseAiOutput(
     .map((p) => p.trim())
     .filter((p) => p.length > 0)
     .slice(0, 3);
-  return { parts: parts.length ? parts : [text.trim()].filter(Boolean), stage, agendar };
+  return { parts: parts.length ? parts : [text.trim()].filter(Boolean), stage, agendar, remarcar, cancelar };
 }
 
 export function classifyStagePromptInstruction(): string {
