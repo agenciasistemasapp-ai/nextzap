@@ -85,8 +85,8 @@ describe("regras do horário", () => {
     expect(iso).not.toContain(at("2026-10-21T10:00").toISOString());
     expect(iso).not.toContain(at("2026-10-21T10:30").toISOString());
     expect(iso).toContain(at("2026-10-21T11:00").toISOString());
-    const alt = nearestAlternatives(at("2026-10-21T10:00"), 30, rules(), busy, 2).map((d) => d.toISOString());
-    expect(alt).toEqual([at("2026-10-21T09:30").toISOString(), at("2026-10-21T11:00").toISOString()]);
+    const alt = nearestAlternatives(at("2026-10-21T10:00"), 30, rules(), busy, 3).map((d) => d.toISOString());
+    expect(alt).toEqual(["09:00", "09:30", "11:00"].map((h) => at(`2026-10-21T${h}`).toISOString()));
   });
 });
 
