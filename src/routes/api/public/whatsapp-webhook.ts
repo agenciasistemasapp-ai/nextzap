@@ -209,9 +209,16 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
           }
 
           const bufferSec = Math.max(0, Math.min(20, Number(cfg?.segundos_buffer ?? 8)));
-          if (bufferSec > 0) {
-            await new Promise((r) => setTimeout(r, bufferSec * 1000));
-          }
+          // Durante a espera do buffer, reconcilia (best-effort) sincronizações Google pendentes.
+          const reconcile = cfg?.agendamento_ativo
+            ? import("@/lib/scheduling.server")
+                .then((m) => m.retryPendingGoogleSyncs(supabaseAdmin, companyId, 2))
+                .catch((e: any) => console.error("[agenda.reconcile]", e?.message))
+            : Promise.resolve();
+          await Promise.all([
+            bufferSec > 0 ? new Promise((r) => setTimeout(r, bufferSec * 1000)) : Promise.resolve(),
+            reconcile,
+          ]);
 
           const { data: newer } = await supabaseAdmin
             .from("mensagens")
@@ -251,7 +258,7 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
 
           const { data: cardRow } = await supabaseAdmin
             .from("crm_cards")
-            .select("status, nome, stage_id")
+            .select("id, status, nome, stage_id")
             .eq("company_id", companyId)
             .eq("numero", number)
             .maybeSingle();
@@ -264,6 +271,20 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
             .eq("company_id", companyId)
             .maybeSingle();
 
+          // Agenda real: horários livres verificados agora (agenda interna + Google, se conectado).
+          let schedCtx: any = null;
+          let agendaBloco: string | undefined;
+          if (cfg?.agendamento_ativo) {
+            try {
+              const sched = await import("@/lib/scheduling.server");
+              schedCtx = await sched.loadSchedulingContext(supabaseAdmin, companyId, cfg);
+              agendaBloco = await sched.buildSchedulingPrompt(supabaseAdmin, companyId, schedCtx, number);
+            } catch (e: any) {
+              console.error("[agenda.prompt]", e?.message);
+              agendaBloco = "AGENDAMENTO: neste momento você NÃO consegue ver a agenda. Não ofereça nem confirme horários; diga que alguém da equipe vai confirmar. Nunca emita [AGENDAR].";
+            }
+          }
+
           const responderEmPartes = cfg?.responder_em_partes ?? true;
           const system = buildSystemPrompt(cfg ?? {}, {
             responderEmPartes,
@@ -272,6 +293,7 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
             produtos,
             stages: stages.map((s) => ({ nome: s.nome, tipo: s.tipo })),
             googleConectado: !!googleIntegration?.conectado,
+            agendamento: agendaBloco,
           });
 
           const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
@@ -324,21 +346,26 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
             console.error("[ai]", e?.message);
           }
 
-          const { parts, stage, agendar } = parseAiOutput(rawReply, stages.map((s) => ({ nome: s.nome, tipo: s.tipo })));
-          const finalParts = sanitizeAiParts(responderEmPartes ? parts : [parts.join(" ")]);
+          const { parts, stage, agendar, remarcar, cancelar } = parseAiOutput(rawReply, stages.map((s) => ({ nome: s.nome, tipo: s.tipo })));
+          let finalParts = sanitizeAiParts(responderEmPartes ? parts : [parts.join(" ")]);
 
-          // Cria evento no Google Agenda se a IA marcou [AGENDAR: ...]
-          if (agendar && googleIntegration?.conectado) {
+          // Agendamento: a IA só PEDE a ação; o backend valida, reserva e escreve a confirmação.
+          if (cfg?.agendamento_ativo) {
             try {
-              const { createCalendarEventForCompany } = await import("@/lib/google.server");
-              await createCalendarEventForCompany(supabaseAdmin, companyId, {
-                titulo: agendar.titulo,
-                inicio: agendar.inicio,
-                fim: agendar.fim,
-                descricao: `Agendado via WhatsApp — ${pushName || number}`,
-              });
+              const sched = await import("@/lib/scheduling.server");
+              const { looksLikeBookingConfirmation, MSG } = await import("@/lib/scheduling");
+              if (!schedCtx) schedCtx = await sched.loadSchedulingContext(supabaseAdmin, companyId, cfg);
+              const acaoMsg = await sched.executarAcaoAgenda(
+                supabaseAdmin, companyId, schedCtx,
+                { agendar, remarcar, cancelar },
+                { numero: number, nome: cardRow?.nome || pushName || null, cardId: (cardRow as any)?.id ?? null },
+              );
+              if (acaoMsg) finalParts = [acaoMsg];
+              else if (looksLikeBookingConfirmation(finalParts.join(" "))) finalParts = [MSG.pedirConfirmacao()];
             } catch (e: any) {
-              console.error("[agendar]", e?.message);
+              console.error("[agenda.acao]", e?.message);
+              const { MSG } = await import("@/lib/scheduling");
+              if (agendar || remarcar || cancelar) finalParts = [MSG.falha()];
             }
           }
 
