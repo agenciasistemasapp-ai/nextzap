@@ -49,6 +49,8 @@ export const Route = createFileRoute("/api/public/google-callback")({
           expiry: new Date(Date.now() + (tok.expires_in ?? 3600) * 1000).toISOString(),
           calendar_id: "primary",
           conectado: true,
+          ultimo_erro: null,
+          ultimo_erro_em: null,
         }, { onConflict: "company_id" });
 
         return new Response(

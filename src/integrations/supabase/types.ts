@@ -16,37 +16,73 @@ export type Database = {
     Tables: {
       agendamento: {
         Row: {
+          cancelado_em: string | null
           card_id: string | null
           company_id: string
+          contato_nome: string | null
+          contato_numero: string | null
           created_at: string
           fim: string
           google_event_id: string | null
+          google_sync_em: string | null
+          google_sync_erro: string | null
+          google_sync_status: string
+          google_sync_tentativas: number
           id: string
+          idempotency_key: string | null
           inicio: string
+          origem: string
+          recurso: string
+          servico: string | null
           status: string
           titulo: string
+          updated_at: string
         }
         Insert: {
+          cancelado_em?: string | null
           card_id?: string | null
           company_id: string
+          contato_nome?: string | null
+          contato_numero?: string | null
           created_at?: string
           fim: string
           google_event_id?: string | null
+          google_sync_em?: string | null
+          google_sync_erro?: string | null
+          google_sync_status?: string
+          google_sync_tentativas?: number
           id?: string
+          idempotency_key?: string | null
           inicio: string
+          origem?: string
+          recurso?: string
+          servico?: string | null
           status?: string
           titulo: string
+          updated_at?: string
         }
         Update: {
+          cancelado_em?: string | null
           card_id?: string | null
           company_id?: string
+          contato_nome?: string | null
+          contato_numero?: string | null
           created_at?: string
           fim?: string
           google_event_id?: string | null
+          google_sync_em?: string | null
+          google_sync_erro?: string | null
+          google_sync_status?: string
+          google_sync_tentativas?: number
           id?: string
+          idempotency_key?: string | null
           inicio?: string
+          origem?: string
+          recurso?: string
+          servico?: string | null
           status?: string
           titulo?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1141,6 +1177,8 @@ export type Database = {
           email: string | null
           expiry: string | null
           refresh_token: string | null
+          ultimo_erro: string | null
+          ultimo_erro_em: string | null
           updated_at: string
         }
         Insert: {
@@ -1151,6 +1189,8 @@ export type Database = {
           email?: string | null
           expiry?: string | null
           refresh_token?: string | null
+          ultimo_erro?: string | null
+          ultimo_erro_em?: string | null
           updated_at?: string
         }
         Update: {
@@ -1161,6 +1201,8 @@ export type Database = {
           email?: string | null
           expiry?: string | null
           refresh_token?: string | null
+          ultimo_erro?: string | null
+          ultimo_erro_em?: string | null
           updated_at?: string
         }
         Relationships: [

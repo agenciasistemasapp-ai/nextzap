@@ -20,6 +20,7 @@ import { Route as ReembolsoRouteImport } from './routes/reembolso'
 import { Route as ResetSenhaRouteImport } from './routes/reset-senha'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as TrocarSenhaRouteImport } from './routes/trocar-senha'
+import { Route as AppAgendaRouteImport } from './routes/app/agenda'
 import { Route as AppAgenteRouteImport } from './routes/app/agente'
 import { Route as AppCampanhasRouteImport } from './routes/app/campanhas'
 import { Route as AppCheckoutRouteImport } from './routes/app/checkout'
@@ -117,6 +118,11 @@ const TrocarSenhaRoute = TrocarSenhaRouteImport.update({
   id: '/trocar-senha',
   path: '/trocar-senha',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppAgendaRoute = AppAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppAgenteRoute = AppAgenteRouteImport.update({
   id: '/agente',
@@ -343,6 +349,7 @@ export interface FileRoutesByFullPath {
   '/reset-senha': typeof ResetSenhaRoute
   '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
+  '/app/agenda': typeof AppAgendaRoute
   '/app/agente': typeof AppAgenteRouteWithChildren
   '/app/campanhas': typeof AppCampanhasRoute
   '/app/checkout': typeof AppCheckoutRoute
@@ -396,6 +403,7 @@ export interface FileRoutesByTo {
   '/reset-senha': typeof ResetSenhaRoute
   '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
+  '/app/agenda': typeof AppAgendaRoute
   '/app/agente': typeof AppAgenteRouteWithChildren
   '/app/campanhas': typeof AppCampanhasRoute
   '/app/checkout': typeof AppCheckoutRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/reset-senha': typeof ResetSenhaRoute
   '/termos': typeof TermosRoute
   '/trocar-senha': typeof TrocarSenhaRoute
+  '/app/agenda': typeof AppAgendaRoute
   '/app/agente': typeof AppAgenteRouteWithChildren
   '/app/campanhas': typeof AppCampanhasRoute
   '/app/checkout': typeof AppCheckoutRoute
@@ -509,6 +518,7 @@ export interface FileRouteTypes {
     | '/reset-senha'
     | '/termos'
     | '/trocar-senha'
+    | '/app/agenda'
     | '/app/agente'
     | '/app/campanhas'
     | '/app/checkout'
@@ -562,6 +572,7 @@ export interface FileRouteTypes {
     | '/reset-senha'
     | '/termos'
     | '/trocar-senha'
+    | '/app/agenda'
     | '/app/agente'
     | '/app/campanhas'
     | '/app/checkout'
@@ -617,6 +628,7 @@ export interface FileRouteTypes {
     | '/reset-senha'
     | '/termos'
     | '/trocar-senha'
+    | '/app/agenda'
     | '/app/agente'
     | '/app/campanhas'
     | '/app/checkout'
@@ -759,6 +771,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/trocar-senha'
       preLoaderRoute: typeof TrocarSenhaRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/agenda': {
+      id: '/app/agenda'
+      path: '/agenda'
+      fullPath: '/app/agenda'
+      preLoaderRoute: typeof AppAgendaRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/agente': {
       id: '/app/agente'
@@ -1070,6 +1089,7 @@ const AppAgenteRouteWithChildren = AppAgenteRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
+  AppAgendaRoute: typeof AppAgendaRoute
   AppAgenteRoute: typeof AppAgenteRouteWithChildren
   AppCampanhasRoute: typeof AppCampanhasRoute
   AppCheckoutRoute: typeof AppCheckoutRoute
@@ -1087,6 +1107,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAgendaRoute: AppAgendaRoute,
   AppAgenteRoute: AppAgenteRouteWithChildren,
   AppCampanhasRoute: AppCampanhasRoute,
   AppCheckoutRoute: AppCheckoutRoute,
