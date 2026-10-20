@@ -52,18 +52,26 @@ export function parseAntecedenciaMin(input: string | null | undefined): number |
 export function parseServicos(text: string | null | undefined, defaultMin: number): Servico[] {
   const raw = String(text ?? "")
     .split(/\n|;|,(?![^()]*\))/)
-    .map((s) => s.replace(/^[\s•\-*\d.)]+/, "").trim())
+    .map((s) => s.replace(/^[\s•*\-]+/, "").trim())
     .filter(Boolean);
+  const DUR_RE = /(\d+\s*h\s*\d{1,2}\b|\d+(?:[.,]\d+)?\s*(?:h|hr|hrs|hora|horas)\b(?:\s*e\s*meia)?|\d+\s*(?:min|mins|minuto|minutos)\b)/i;
   const out: Servico[] = [];
   for (const item of raw) {
-    const durMatch = item.match(/[(\-–:|]\s*([^()\-–:|]*\d[^()\-–:|]*)\)?\s*$/);
     let dur: number | null = null;
     let nome = item;
-    if (durMatch) {
-      const d = parseDurationMin(durMatch[1].replace(/r\$\s*[\d.,]+/i, ""));
-      if (d) { dur = d; nome = item.slice(0, durMatch.index).trim(); }
+    const m = item.match(DUR_RE);
+    if (m) {
+      const d = parseDurationMin(m[1]);
+      if (d) { dur = d; nome = item.replace(m[0], " "); }
     }
-    nome = nome.replace(/[\s\-–:|(]+$/, "").trim();
+    nome = nome
+      .replace(/r\$\s*[\d.,]+/gi, " ")
+      .replace(/\(\s*\)/g, " ")
+      .replace(/[\s\-–:|()]+$/g, "")
+      .replace(/^[\s\-–:|()]+/g, "")
+      .replace(/\s*[\-–:|]\s*[\-–:|]\s*/g, " - ")
+      .replace(/\s+/g, " ")
+      .trim();
     if (!nome) continue;
     out.push({ nome: nome.slice(0, 80), duracaoMin: dur ?? defaultMin });
   }
