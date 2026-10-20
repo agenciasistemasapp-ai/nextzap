@@ -3,9 +3,9 @@
 // Sempre recebe o company_id já validado (webhook com token ou sessão autenticada).
 
 import {
-  checkSlot, firstName, formatLocalIso, formatSlotPt, formatSlotsForPrompt, hasAnyOpenDay,
-  listAvailableSlots, MSG, nearestAlternatives, normalize, parseAntecedenciaMin, parseDurationMin,
-  parseServicos, findServico, type Interval, type Servico, type SlotRules,
+  checkSlot, firstName, formatSlotPt, formatSlotsForPrompt, hasAnyOpenDay,
+  listAvailableSlots, MSG, nearestAlternatives, parseAiDateTime, parseAntecedenciaMin, parseDurationMin,
+  parseServicos, findServico, zonedToUtc, type Interval, type Servico, type SlotRules,
 } from "@/lib/scheduling";
 import type { DaySchedule } from "@/lib/business-hours";
 
@@ -113,7 +113,7 @@ export async function getGoogleAccess(admin: any, companyId: string):
 
 /** Períodos ocupados no calendário Google (ignora eventos "livres" e cancelados). */
 export async function getGoogleBusy(
-  admin: any, companyId: string, from: Date, to: Date, excludeEventIds: string[] = [],
+  admin: any, companyId: string, from: Date, to: Date, excludeEventIds: string[] = [], tz = "America/Sao_Paulo",
 ): Promise<{ ok: true; busy: Interval[] } | { ok: false; error: string }> {
   const acc = await getGoogleAccess(admin, companyId);
   if (!acc.ok) return acc;
@@ -145,9 +145,14 @@ export async function getGoogleBusy(
           s = new Date(ev.start.dateTime).getTime();
           e = new Date(ev.end?.dateTime ?? ev.start.dateTime).getTime();
         } else if (ev.start?.date) {
-          // Dia inteiro: início inclusivo, fim exclusivo. Bloqueia o dia todo (margem de fuso).
-          s = new Date(`${ev.start.date}T00:00:00-03:00`).getTime() - 3 * 3600_000;
-          e = new Date(`${ev.end?.date ?? ev.start.date}T00:00:00-03:00`).getTime() + 3 * 3600_000;
+          // Dia inteiro: start.date inclusivo, end.date exclusivo, no fuso da empresa.
+          const [ys, ms, ds] = String(ev.start.date).split("-").map(Number);
+          const endDate = String(ev.end?.date ?? ev.start.date);
+          const [ye, me, de] = endDate.split("-").map(Number);
+          s = zonedToUtc(ys, ms, ds, 0, 0, tz).getTime();
+          e = endDate === ev.start.date
+            ? s + 24 * 3600_000
+            : zonedToUtc(ye, me, de, 0, 0, tz).getTime();
         } else continue;
         if (e > s) busy.push({ start: s, end: e });
       }
@@ -164,7 +169,7 @@ export async function getGoogleBusy(
 
 /** ID determinístico do evento Google (base32hex) → retentativas nunca duplicam o evento. */
 export function googleEventIdFor(agendamentoId: string): string {
-  return `nz${agendamentoId.replace(/-/g, "").toLowerCase()}`.replace(/[^a-v0-9]/g, "0");
+  return agendamentoId.replace(/-/g, "").toLowerCase().replace(/[^a-v0-9]/g, "0");
 }
 
 /**
@@ -262,7 +267,7 @@ async function getBusy(
   const internal = await getInternalBusy(admin, companyId, from, to, exclude?.id);
   if (!ctx.google.conectado) return { ok: true, busy: internal };
   const ex = exclude ? [exclude.eventId || googleEventIdFor(exclude.id)] : [];
-  const g = await getGoogleBusy(admin, companyId, from, to, ex);
+  const g = await getGoogleBusy(admin, companyId, from, to, ex, ctx.tz);
   if (!g.ok) return g;
   return { ok: true, busy: [...internal, ...g.busy] };
 }
@@ -557,11 +562,8 @@ export async function executarAcaoAgenda(
 }
 
 function parseAi(s: string, tz: string): Date | null {
-  // import tardio evita ciclo; parseAiDateTime é puro
-  return parseAiDateTimeLocal(s, tz);
+  return parseAiDateTime(s, tz);
 }
-
-import { parseAiDateTime as parseAiDateTimeLocal } from "@/lib/scheduling";
 
 async function logLead(admin: any, companyId: string, cardId: string | null | undefined, tipo: string, descricao: string) {
   if (!cardId) return;
@@ -569,5 +571,3 @@ async function logLead(admin: any, companyId: string, cardId: string | null | un
     await admin.from("lead_evento").insert({ company_id: companyId, card_id: cardId, tipo, descricao: descricao.slice(0, 300) });
   } catch {}
 }
-
-export { normalize, formatLocalIso };
