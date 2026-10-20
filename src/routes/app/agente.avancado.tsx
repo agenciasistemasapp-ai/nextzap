@@ -537,7 +537,7 @@ function AgentePage() {
                 <Area label="Horários disponíveis" value={cfg.horarios_disponiveis} onChange={(v) => up("horarios_disponiveis", v)} rows={2} />
                 <p className="text-xs text-muted-foreground">
                   Com o agendamento ativo, a IA só oferece horários livres de verdade e quem confirma a reserva é o sistema.
-                  Os dias e horários de trabalho vêm da aba Horários. Escreva um serviço por linha com a duração (ex.: "Corte - 30 min", "Coloração - 1h30");
+                  Os dias e horários de trabalho vêm de Configurações → Horários. Escreva um serviço por linha com a duração (ex.: "Corte - 30 min", "Coloração - 1h30");
                   sem duração, vale a duração padrão. Pausas e folgas: bloqueie na tela Agenda.
                 </p>
               </Section>
