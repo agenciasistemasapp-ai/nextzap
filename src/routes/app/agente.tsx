@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Bot, Loader2, Save, Send, Sparkles, Wand2, ChevronDown, Settings2, RefreshCcw, HelpCircle, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Bot, Loader2, Save, Send, Sparkles, Wand2, ChevronDown, Settings2, RefreshCcw, HelpCircle, ArrowLeft, CheckCircle2, CalendarDays } from "lucide-react";
 import { brand } from "@/config/brand";
 import { buildSystemPrompt } from "@/lib/ai-prompt";
 import { testAiReply } from "@/lib/evolution.functions";
@@ -283,7 +283,7 @@ function AgentePage() {
         </div>
 
         <div className="text-center">
-          <Link to="/app/agente/avancado" className="text-xs text-muted-foreground underline">
+          <Link to="/app/agente/avancado" search={{}} className="text-xs text-muted-foreground underline">
             Prefiro preencher tudo manualmente (edição avançada)
           </Link>
         </div>
@@ -305,7 +305,12 @@ function AgentePage() {
             {cfg?.papel_objetivo || "Atendente virtual da sua empresa."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/app/agente/avancado" search={{ aba: "agendamento" }}>
+              <CalendarDays className="size-3.5 mr-1.5" /> Agendamento
+            </Link>
+          </Button>
           <Button variant="outline" size="sm" onClick={() => { setHasConfig(false); setDescricao(""); setStep("descrever"); setPerguntas([]); setRespostas({}); setResumoIA(""); setCobertura(0); }}>
             <RefreshCcw className="size-3.5 mr-1.5" /> Refazer
           </Button>
@@ -372,7 +377,7 @@ function AgentePage() {
           </Collapsible>
 
           <div className="text-center">
-            <Link to="/app/agente/avancado" className="text-xs text-muted-foreground underline">
+            <Link to="/app/agente/avancado" search={{}} className="text-xs text-muted-foreground underline">
               Edição avançada (todos os campos)
             </Link>
           </div>

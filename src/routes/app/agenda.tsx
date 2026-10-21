@@ -160,7 +160,7 @@ function AgendaPage() {
       {data && !data.agendamentoAtivo && (
         <div className="rounded-xl border border-[color:var(--hairline)] bg-[color:var(--panel-2)] p-4 text-sm">
           O agendamento pela IA está desligado. A agenda funciona para lançamentos da equipe.{" "}
-          {isAdmin && <Link to="/app/agente/avancado" className="underline">Ativar no Agente IA</Link>}
+          {isAdmin && <Link to="/app/agente/avancado" search={{ aba: "agendamento" }} className="underline">Ativar no Agente IA</Link>}
         </div>
       )}
       {data && data.agendamentoAtivo && data.problemas.length > 0 && (
