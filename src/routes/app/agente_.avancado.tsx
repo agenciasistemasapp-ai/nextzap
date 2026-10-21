@@ -20,7 +20,8 @@ import { InitialsAvatar } from "@/components/ui/initials-avatar";
 import { usePlanFeatures } from "@/hooks/use-plan-features";
 import { Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/app/agente/avancado")({
+export const Route = createFileRoute("/app/agente_/avancado")({
+  validateSearch: (s: Record<string, unknown>) => ({ aba: typeof s.aba === "string" ? s.aba : undefined }),
   head: () => ({ meta: [{ title: `${brand.name} — Agente IA` }] }),
   beforeLoad: ({ context }: any) => {
     const r = context?.membership?.role;
@@ -216,7 +217,7 @@ function AgentePage() {
 
       <div className="grid lg:grid-cols-[1fr_minmax(380px,440px)] gap-6">
         <div>
-          <Tabs defaultValue="modelo">
+          <Tabs defaultValue={abaInicial}>
             <TabsList className="flex flex-wrap h-auto gap-1 bg-transparent p-0 mb-4">
               {[["modelo","Modelo IA"],["negocio","Negócio"],["produtos","Produtos"],["ofertas","Ofertas"],["vendas","Vendas"],
                 ["suporte","Suporte"],["posvenda","Pós-venda"],["personalidade","Personalidade"],
