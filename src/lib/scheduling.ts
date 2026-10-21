@@ -46,46 +46,78 @@ export function parseAntecedenciaMin(input: string | null | undefined): number |
 }
 
 /**
- * Lê "Serviços agendáveis" (texto livre). Cada linha ou item separado por vírgula/; vira um serviço.
- * Se o item tiver duração ("Corte - 30 min", "Coloração (1h30)"), ela é usada; senão, a duração padrão.
+ * Lê uma lista de serviços em texto livre. Cada linha ou item separado por vírgula, ";", "|" ou
+ * ". " (antes de nova frase) vira um serviço. Prefixos de categoria em maiúsculas ("FACIAL: ...")
+ * são ignorados. Se o item tiver duração ("Corte - 30 min", "Coloração (1h30)") ela é usada;
+ * faixas ("60 a 75 min", "30-40 min") usam o MAIOR valor, para nunca invadir o próximo cliente.
+ * Sem duração: usa a padrão, ou descarta o item quando `onlyWithDuration`.
  */
-export function parseServicos(text: string | null | undefined, defaultMin: number): Servico[] {
+export function parseServicos(
+  text: string | null | undefined,
+  defaultMin: number,
+  opts: { onlyWithDuration?: boolean } = {},
+): Servico[] {
   const raw = String(text ?? "")
-    .split(/\n|;|,(?![^()]*\))/)
+    .split(/\n|;|\||,(?![^()]*\))|\.\s+(?=[A-ZÀ-Ý])/)
     .map((s) => s.replace(/^[\s•*\-]+/, "").trim())
     .filter(Boolean);
+  const RANGE_RE = /(\d+)\s*(?:a|à|ate|até|-|–|~)\s*(\d+)\s*(min|mins|minuto|minutos|h|hr|hrs|hora|horas)\b/i;
   const DUR_RE = /(\d+\s*h\s*\d{1,2}\b|\d+(?:[.,]\d+)?\s*(?:h|hr|hrs|hora|horas)\b(?:\s*e\s*meia)?|\d+\s*(?:min|mins|minuto|minutos)\b)/i;
+  const CATEGORIA_RE = /^([A-ZÀ-Ý][A-ZÀ-Ý\s&/\-]{2,}):\s*/;
   const out: Servico[] = [];
-  for (const item of raw) {
+  for (const original of raw) {
+    let item = original;
+    let categoria = "";
+    const cat = item.match(CATEGORIA_RE);
+    if (cat) { categoria = cat[1].trim(); item = item.slice(cat[0].length); }
     let dur: number | null = null;
     let nome = item;
-    const m = item.match(DUR_RE);
-    if (m) {
-      const d = parseDurationMin(m[1]);
-      if (d) { dur = d; nome = item.replace(m[0], " "); }
+    const r = item.match(RANGE_RE);
+    if (r) {
+      const max = Math.max(Number(r[1]), Number(r[2]));
+      const isHora = /^h/i.test(r[3]);
+      const d = isHora ? max * 60 : max;
+      if (d > 0 && d <= 24 * 60) { dur = d; nome = item.replace(r[0], " "); }
+    }
+    if (dur == null) {
+      const m = item.match(DUR_RE);
+      if (m) {
+        const d = parseDurationMin(m[1]);
+        if (d) { dur = d; nome = item.replace(m[0], " "); }
+      }
     }
     nome = nome
       .replace(/r\$\s*[\d.,]+/gi, " ")
-      .replace(/\(\s*\)/g, " ")
-      .replace(/[\s\-–:|()]+$/g, "")
-      .replace(/^[\s\-–:|()]+/g, "")
+      .replace(/\([^)]*\)/g, " ")
+      .replace(/\ba partir de\s*$/i, " ")
+      .replace(/[\s\-–:|().]+$/g, "")
+      .replace(/^[\s\-–:|().]+/g, "")
       .replace(/\s*[\-–:|]\s*[\-–:|]\s*/g, " - ")
       .replace(/\s+/g, " ")
+      .replace(/\ba partir de$/i, "")
       .trim();
+    if (!nome && categoria) nome = categoria;
     if (!nome) continue;
+    if (dur == null && opts.onlyWithDuration) continue;
     out.push({ nome: nome.slice(0, 80), duracaoMin: dur ?? defaultMin });
   }
   return out;
 }
 
+/**
+ * Acha o serviço pedido. Nome exato vence; depois o maior nome contido no pedido.
+ * Se o pedido for genérico e couber em mais de um serviço ("limpeza de pele" → profunda/express),
+ * retorna null para o sistema perguntar qual — nunca chuta uma duração.
+ */
 export function findServico(servicos: Servico[], pedido: string | null | undefined): Servico | null {
   const q = normalize(String(pedido ?? ""));
   if (!q) return null;
   const exact = servicos.find((s) => normalize(s.nome) === q);
   if (exact) return exact;
-  const contains = servicos.filter((s) => q.includes(normalize(s.nome)) || normalize(s.nome).includes(q));
-  if (contains.length === 1) return contains[0];
-  if (contains.length > 1) return contains.sort((a, b) => b.nome.length - a.nome.length)[0];
+  const dentroDoPedido = servicos.filter((s) => q.includes(normalize(s.nome)));
+  if (dentroDoPedido.length) return dentroDoPedido.sort((a, b) => b.nome.length - a.nome.length)[0];
+  const pedidoDentro = servicos.filter((s) => normalize(s.nome).includes(q));
+  if (pedidoDentro.length === 1) return pedidoDentro[0];
   return null;
 }
 
