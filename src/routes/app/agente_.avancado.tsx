@@ -21,7 +21,7 @@ import { usePlanFeatures } from "@/hooks/use-plan-features";
 import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/agente_/avancado")({
-  validateSearch: (s: Record<string, unknown>) => ({ aba: typeof s.aba === "string" ? s.aba : undefined }),
+  validateSearch: (s: Record<string, unknown>): { aba?: string } => (typeof s.aba === "string" ? { aba: s.aba } : {}),
   head: () => ({ meta: [{ title: `${brand.name} — Agente IA` }] }),
   beforeLoad: ({ context }: any) => {
     const r = context?.membership?.role;
