@@ -43,6 +43,41 @@ describe("durações e antecedência", () => {
     ]);
     expect(findServico(s, "coloracao")?.duracaoMin).toBe(90);
   });
+  it("faixa de duração usa o maior valor (60 a 75 min → 75)", () => {
+    const s = parseServicos("Limpeza de pele profunda (60 a 75 min) R$ 149 | Limpeza de pele express (30-40 min) R$ 89", 30);
+    expect(s).toEqual([
+      { nome: "Limpeza de pele profunda", duracaoMin: 75 },
+      { nome: "Limpeza de pele express", duracaoMin: 40 },
+    ]);
+  });
+  it("lê durações da lista de produtos/serviços com categorias e ignora itens sem duração", () => {
+    const texto =
+      "FACIAL: Limpeza de pele profunda (60 a 75 min) R$ 149 | Limpeza de pele express (30 a 40 min) R$ 89 | Hidratação facial (45 min) R$ 119. " +
+      "MASSAGENS E BEM-ESTAR: Massagem relaxante (50 min) R$ 139 | Protocolo corporal personalizado a partir de R$ 219 (duração sob avaliação). " +
+      "ORIENTAÇÃO: Avaliação estética inicial (30 min) R$ 50 (abatida em procedimentos a partir de R$ 149 no mesmo dia).";
+    const s = parseServicos(texto, 30, { onlyWithDuration: true });
+    expect(s).toEqual([
+      { nome: "Limpeza de pele profunda", duracaoMin: 75 },
+      { nome: "Limpeza de pele express", duracaoMin: 40 },
+      { nome: "Hidratação facial", duracaoMin: 45 },
+      { nome: "Massagem relaxante", duracaoMin: 50 },
+      { nome: "Avaliação estética inicial", duracaoMin: 30 },
+    ]);
+  });
+  it("pedido genérico com mais de uma opção não chuta duração", () => {
+    const s = [
+      { nome: "Limpeza de pele profunda", duracaoMin: 75 },
+      { nome: "Limpeza de pele express", duracaoMin: 40 },
+    ];
+    expect(findServico(s, "limpeza de pele")).toBeNull();
+    expect(findServico(s, "Limpeza de pele profunda")?.duracaoMin).toBe(75);
+    expect(findServico(s, "limpeza de pele profunda com hidratação")?.duracaoMin).toBe(75);
+  });
+  it("profunda de 75 min às 11:30 bloqueia o horário de 12:00", () => {
+    const busy = [{ start: at("2026-10-21T11:30").getTime(), end: at("2026-10-21T11:30").getTime() + 75 * 60_000 }];
+    expect(checkSlot(at("2026-10-21T12:00"), 40, rules(), busy).ok).toBe(false);
+    expect(checkSlot(at("2026-10-21T12:45"), 40, rules(), busy).ok).toBe(true);
+  });
 });
 
 describe("fuso horário", () => {
