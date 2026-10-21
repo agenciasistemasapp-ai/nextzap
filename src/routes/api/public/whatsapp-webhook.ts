@@ -452,8 +452,10 @@ async function getAiThrottleReason(admin: any, companyId: string, numero: string
       .gte("created_at", new Date(now - 60_000).toISOString()),
   ]);
 
-  if ((contactRecent.count ?? 0) >= 6) return "contact-rate-limit";
-  if ((companyRecent.count ?? 0) >= 20) return "company-rate-limit";
+  // Cada resposta pode vir em 2-3 partes; o limite conta partes. 30 partes/10 min por contato
+  // (~10-15 respostas) ainda barra loops com outros robôs sem travar uma conversa normal.
+  if ((contactRecent.count ?? 0) >= 30) return "contact-rate-limit";
+  if ((companyRecent.count ?? 0) >= 60) return "company-rate-limit";
   return null;
 }
 
