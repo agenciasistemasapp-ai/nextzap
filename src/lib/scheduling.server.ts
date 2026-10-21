@@ -328,6 +328,8 @@ ${meusTxt}
 
 REGRAS DE AGENDAMENTO:
 - Ofereça SOMENTE horários da lista acima. Nunca invente horário nem diga que um horário está livre se não estiver na lista.
+- Use a lista "até X min" com o MENOR X que seja igual ou maior que a duração do serviço escolhido (ex.: serviço de 50 min → lista de até 60 min). Assim o atendimento nunca invade o horário de outro cliente.
+- Se o cliente falar de um serviço de forma genérica e houver mais de uma opção (ex.: limpeza profunda ou express), pergunte qual antes de oferecer horários.
 - Pergunte só o que faltar: serviço, nome e dia/horário. Uma pergunta por vez.
 - Perguntar preço, serviço ou horários NÃO é pedido de reserva. Só reserve quando o cliente escolher um dia + horário específico e disser claramente que quer.
 - Quando o cliente confirmar, responda APENAS com a linha:
