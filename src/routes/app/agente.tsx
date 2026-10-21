@@ -305,7 +305,12 @@ function AgentePage() {
             {cfg?.papel_objetivo || "Atendente virtual da sua empresa."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/app/agente/avancado" search={{ aba: "agendamento" }}>
+              <CalendarDays className="size-3.5 mr-1.5" /> Agendamento
+            </Link>
+          </Button>
           <Button variant="outline" size="sm" onClick={() => { setHasConfig(false); setDescricao(""); setStep("descrever"); setPerguntas([]); setRespostas({}); setResumoIA(""); setCobertura(0); }}>
             <RefreshCcw className="size-3.5 mr-1.5" /> Refazer
           </Button>

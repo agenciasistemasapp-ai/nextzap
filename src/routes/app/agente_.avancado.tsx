@@ -111,8 +111,12 @@ function applyPreset(p: PersonalidadePreset, cfg: any, setCfg: (fn: any) => void
 
 interface Produto { id: string; nome: string; preco: number; descricao: string | null; ativo: boolean; ordem: number; }
 
+const ABAS = ["modelo","negocio","produtos","ofertas","vendas","suporte","posvenda","personalidade","agendamento","regras"];
+
 function AgentePage() {
   const ctx = Route.useRouteContext();
+  const { aba } = Route.useSearch();
+  const abaInicial = aba && ABAS.includes(aba) ? aba : "modelo";
   const companyId = ctx.company?.id;
   const test = useServerFn(testAiReply);
   const gStart = useServerFn(startGoogleOAuth);
