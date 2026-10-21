@@ -42,11 +42,15 @@ export async function loadSchedulingContext(admin: any, companyId: string, cfg?:
   if (!hasAnyOpenDay(dias)) problemas.push("Nenhum dia/horário de funcionamento configurado (aba Horários).");
   if (defaultMin == null) problemas.push(`Duração padrão inválida: "${c?.duracao_padrao ?? ""}".`);
   if (leadMin == null) problemas.push(`Antecedência mínima inválida: "${c?.antecedencia_min ?? ""}".`);
+  // Sem "Serviços agendáveis" preenchido, usa as durações escritas em "Produtos/Serviços"
+  // (só itens com duração explícita) para não reservar tudo com a duração padrão.
+  let servicos = parseServicos(c?.servicos_agendaveis, defaultMin ?? 30);
+  if (!servicos.length) servicos = parseServicos(c?.produtos_servicos, defaultMin ?? 30, { onlyWithDuration: true });
   return {
     ativo: !!c?.agendamento_ativo,
     tz,
     dias,
-    servicos: parseServicos(c?.servicos_agendaveis, defaultMin ?? 30),
+    servicos,
     defaultMin,
     leadMin,
     observacoes: String(c?.horarios_disponiveis ?? "").trim(),
@@ -291,10 +295,15 @@ Agora: ${formatSlotPt(now, ctx.tz)} (fuso ${ctx.tz}).`;
   }
 
   const rules = rulesOf(ctx, now);
-  const duracoes = [...new Set([ctx.defaultMin!, ...ctx.servicos.map((s) => s.duracaoMin)])].slice(0, 3);
+  const todas = [...new Set(ctx.servicos.length ? ctx.servicos.map((s) => s.duracaoMin) : [ctx.defaultMin!])]
+    .sort((a, b) => a - b);
+  // No máximo 4 listas: menor, maior e intermediárias — o backend revalida a duração real na reserva.
+  const duracoes = todas.length <= 4
+    ? todas
+    : [...new Set([todas[0], todas[Math.floor(todas.length / 3)], todas[Math.floor((2 * todas.length) / 3)], todas[todas.length - 1]])];
   const listas = duracoes.map((d) => {
     const slots = listAvailableSlots(d, rules, busy, { days: 7, maxPerDay: 8, maxTotal: 40 });
-    return `Para serviços de ${d} min:\n${slots.length ? formatSlotsForPrompt(slots, ctx.tz) : "(nenhum horário livre nos próximos 7 dias)"}`;
+    return `Para serviços de até ${d} min:\n${slots.length ? formatSlotsForPrompt(slots, ctx.tz) : "(nenhum horário livre nos próximos 7 dias)"}`;
   });
 
   const { data: meus } = await admin.from("agendamento").select("inicio, servico, titulo")
