@@ -2,6 +2,7 @@ import { BrandLogo } from "@/components/brand-logo";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { brand, supportWhatsappUrl } from "@/config/brand";
 import heroMockup from "@/assets/hero-desktop.webp";
+import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import {
@@ -792,34 +793,15 @@ function Pricing({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#plano
 
 /* ===================== TESTIMONIALS ===================== */
 function Testimonials() {
-  const items = [
-    {
-      n: "Camila — Studio de Estética",
-      t: "Eu atendia entre clientes e perdia muita agenda. Agora a IA marca sozinha. Faturei 32% a mais no segundo mês.",
-    },
-    {
-      n: "Rafael — Loja de Suplementos",
-      t: "A galera me chamava no WhatsApp 1h da manhã. Hoje todo mundo é respondido na hora. CRM organizado sem eu tocar.",
-    },
-    {
-      n: "Marina — Agência de Marketing",
-      t: "Tirei o lead frio do operacional do time. A IA filtra e só passa quem é quente. Salvou minha sanidade.",
-    },
-  ];
   return (
-    <section className="px-5 md:px-8 py-24 md:py-28">
+    <section id="depoimentos" className="px-5 md:px-8 py-24 md:py-28 overflow-hidden">
       <div className="mx-auto max-w-6xl">
-        <SectionTitle eyebrow="Quem usa" title={<>Times que pararam de perder venda <span className="text-grad">no 'oi, sumiu'</span>.</>} />
-        <div className="mt-12 grid md:grid-cols-3 gap-5">
-          {items.map((it) => (
-            <div key={it.n} className="glass border-sheen rounded-2xl p-6 reveal" data-reveal>
-              <div className="flex gap-1 text-[#facc15]">
-                {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="size-4 fill-current" />)}
-              </div>
-              <p className="text-white/85 mt-4 leading-relaxed text-[15px]">"{it.t}"</p>
-              <div className="mt-5 text-sm text-white/55">{it.n}</div>
-            </div>
-          ))}
+        <SectionTitle eyebrow="Depoimentos" title={<>Quem usa, <span className="text-grad">sente a diferença</span>.</>} />
+        <p className="reveal mt-4 text-center text-white/70 text-base md:text-lg max-w-2xl mx-auto" data-reveal>
+          Veja como empresas estão <span className="text-grad font-semibold">transformando seu atendimento</span> com a NEXTZAP.
+        </p>
+        <div className="mt-12">
+          <TestimonialsCarousel />
         </div>
       </div>
     </section>
