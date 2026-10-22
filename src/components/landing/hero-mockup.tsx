@@ -48,6 +48,7 @@ export function HeroMockup({ src, alt }: { src: string; alt: string }) {
 
   return (
     <div ref={zoneRef} className="hm-zone relative w-full max-w-[600px] sm:max-w-[720px] lg:max-w-none">
+      <div className="hm-halo" aria-hidden="true" />
       <div className="hm-aura" aria-hidden="true" />
       <div className="hm-floor" aria-hidden="true" />
       <div className="hm-float">
@@ -93,19 +94,33 @@ export function HeroMockup({ src, alt }: { src: string; alt: string }) {
           animation: hm-pulse 4.6s ease-in-out infinite;
           will-change: opacity;
         }
+        /* Aura: camadas de luz independentes ATRÁS do mockup, ultrapassando seus limites */
+        .hm-aura, .hm-halo, .hm-floor { position: absolute; pointer-events: none; z-index: 0; }
+        .hm-float { z-index: 1; }
         .hm-aura {
-          position: absolute; left: 8%; right: 8%; top: 12%; bottom: 6%;
-          border-radius: 9999px; pointer-events: none;
-          background: radial-gradient(ellipse at 50% 55%, rgba(57,232,121,.30) 0%, rgba(57,232,121,.10) 40%, transparent 70%);
-          filter: blur(40px);
-          animation: hm-pulse 4.6s ease-in-out infinite;
+          left: -8%; right: -8%; top: -4%; bottom: -16%;
+          border-radius: 50%;
+          background:
+            radial-gradient(ellipse 55% 50% at 50% 62%, rgba(57,232,121,.62) 0%, rgba(57,232,121,.30) 35%, rgba(57,232,121,.08) 62%, transparent 78%);
+          filter: blur(34px);
+          animation: hm-aura 4.6s ease-in-out infinite;
+          will-change: opacity, transform;
+        }
+        .hm-halo {
+          left: -24%; right: -24%; top: -22%; bottom: -30%;
+          border-radius: 50%;
+          background:
+            radial-gradient(ellipse 50% 46% at 50% 58%, rgba(57,232,121,.22) 0%, rgba(57,232,121,.09) 45%, transparent 72%);
+          filter: blur(70px);
+          animation: hm-halo 4.6s ease-in-out infinite;
           will-change: opacity;
         }
         .hm-floor {
-          position: absolute; left: 18%; right: 18%; bottom: -4%; height: 9%;
-          border-radius: 50%; pointer-events: none;
-          background: radial-gradient(ellipse at center, rgba(0,0,0,.55) 0%, rgba(57,232,121,.12) 45%, transparent 72%);
-          filter: blur(14px);
+          left: 10%; right: 10%; bottom: -9%; height: 16%;
+          border-radius: 50%;
+          background:
+            radial-gradient(ellipse at center, rgba(57,232,121,.55) 0%, rgba(57,232,121,.22) 38%, transparent 70%);
+          filter: blur(18px);
           animation: hm-floor 4.6s ease-in-out infinite;
           will-change: transform, opacity;
         }
@@ -113,24 +128,34 @@ export function HeroMockup({ src, alt }: { src: string; alt: string }) {
           0%, 100% { transform: translate3d(0, 0, 0); }
           50% { transform: translate3d(0, -13px, 0); }
         }
+        /* Pulsação sincronizada com a flutuação: luz mais intensa quando o mockup está no alto */
         @keyframes hm-pulse {
+          0%, 100% { opacity: .5; }
+          50% { opacity: .9; }
+        }
+        @keyframes hm-aura {
+          0%, 100% { opacity: .6; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.04); }
+        }
+        @keyframes hm-halo {
           0%, 100% { opacity: .55; }
-          50% { opacity: .95; }
+          50% { opacity: .9; }
         }
         @keyframes hm-floor {
-          0%, 100% { transform: scale(1); opacity: .9; }
-          50% { transform: scale(.88); opacity: .6; }
+          0%, 100% { transform: scale(1); opacity: .95; }
+          50% { transform: scale(.86); opacity: .6; }
         }
 
-        /* Mobile/tablet: mantém flutuação e neon com menos intensidade e sem pulsar */
+        /* Mobile/tablet: mantém flutuação, aura e profundidade com menos intensidade e sem pulsar */
         @media (max-width: 1023px) {
           .hm-float { animation-name: hm-float-sm; }
           .hm-glow {
-            animation: none; opacity: .7;
-            filter: drop-shadow(0 0 8px rgba(57,232,121,.45)) drop-shadow(0 10px 18px rgba(57,232,121,.28));
+            animation: none; opacity: .6;
+            filter: drop-shadow(0 0 8px rgba(57,232,121,.40)) drop-shadow(0 10px 18px rgba(57,232,121,.25));
           }
-          .hm-aura { animation: none; opacity: .7; filter: blur(28px); }
-          .hm-floor { animation: none; }
+          .hm-aura { animation: none; opacity: .75; filter: blur(24px); left: -4%; right: -4%; }
+          .hm-halo { animation: none; opacity: .6; left: -6%; right: -6%; filter: blur(40px); }
+          .hm-floor { animation: none; opacity: .8; }
           .hm-tilt { transform: none; transition: none; }
         }
         @keyframes hm-float-sm {
@@ -139,8 +164,9 @@ export function HeroMockup({ src, alt }: { src: string; alt: string }) {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .hm-float, .hm-glow, .hm-aura, .hm-floor { animation: none !important; }
-          .hm-glow { opacity: .7; }
+          .hm-float, .hm-glow, .hm-aura, .hm-halo, .hm-floor { animation: none !important; }
+          .hm-glow { opacity: .6; }
+          .hm-aura { opacity: .8; }
           .hm-tilt { transform: none !important; transition: none !important; }
         }
       `}</style>
