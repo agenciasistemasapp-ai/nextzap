@@ -182,7 +182,7 @@ export function TestimonialsCarousel() {
           50% { opacity: .45; }
         }
 
-        .tc-arrow {
+        .tc-root .tc-arrow {
           position: absolute; top: 50%; z-index: 5; transform: translateY(-50%);
           width: 52px; height: 52px; border-radius: 9999px;
           display: grid; place-items: center;
@@ -192,25 +192,25 @@ export function TestimonialsCarousel() {
           backdrop-filter: blur(8px);
           transition: box-shadow .25s ease, border-color .25s ease, background .25s ease, transform .25s ease;
         }
-        .tc-arrow:hover, .tc-arrow:focus-visible {
+        .tc-root .tc-arrow:hover, .tc-root .tc-arrow:focus-visible {
           border-color: #39E879; background: rgba(4,16,10,.85);
           box-shadow: 0 0 0 1px #39E879, 0 0 22px rgba(57,232,121,.5);
           outline: none;
         }
-        .tc-arrow:active { transform: translateY(-50%) scale(.94); }
-        .tc-arrow-left { left: calc(50% - var(--tc-w) / 2 - 76px); }
-        .tc-arrow-right { right: calc(50% - var(--tc-w) / 2 - 76px); }
+        .tc-root .tc-arrow:active { transform: translateY(-50%) scale(.94); }
+        .tc-root .tc-arrow-left { left: calc(50% - var(--tc-w) / 2 - 76px); }
+        .tc-root .tc-arrow-right { right: calc(50% - var(--tc-w) / 2 - 76px); }
         @media (max-width: 639px) {
-          .tc-arrow { width: 44px; height: 44px; }
-          .tc-arrow-left { left: 6px; }
-          .tc-arrow-right { right: 6px; }
+          .tc-root .tc-arrow { width: 44px; height: 44px; }
+          .tc-root .tc-arrow-left { left: 6px; }
+          .tc-root .tc-arrow-right { right: 6px; }
         }
 
         .tc-dot { width: 8px; height: 8px; border-radius: 9999px; background: rgba(57,232,121,.25); transition: width .4s ease, background .4s ease; }
         .tc-dot[data-on="true"] { width: 26px; background: #39E879; box-shadow: 0 0 10px rgba(57,232,121,.6); }
 
         @media (prefers-reduced-motion: reduce) {
-          .tc-card, .tc-dot, .tc-arrow { transition: none !important; }
+          .tc-card, .tc-dot, .tc-root .tc-arrow { transition: none !important; }
           .tc-card[data-pos="center"]::after { animation: none; }
         }
       `}</style>
