@@ -138,7 +138,7 @@ export function TestimonialsCarousel() {
           position: absolute; top: 14px; left: 50%;
           width: var(--tc-w); margin: 0 0 0 calc(var(--tc-w) / -2);
           aspect-ratio: 940 / 1672;
-          border-radius: 22px; overflow: hidden;
+          border-radius: 22px;
           background: #04100A;
           transition:
             transform ${TRANSITION_MS}ms cubic-bezier(.22,.8,.24,1),
@@ -148,7 +148,13 @@ export function TestimonialsCarousel() {
           will-change: transform, opacity, filter;
           user-select: none;
         }
-        .tc-card img { width: 100%; height: 100%; object-fit: contain; display: block; }
+        .tc-card img { width: 100%; height: 100%; object-fit: contain; display: block; border-radius: 22px; }
+        .tc-card::after {
+          content: ""; position: absolute; inset: 0; border-radius: 22px; pointer-events: none;
+          box-shadow: 0 0 34px 6px rgba(57,232,121,.35);
+          opacity: 0; transition: opacity ${TRANSITION_MS}ms ease;
+        }
+        .tc-card[data-pos="center"]::after { opacity: 1; animation: tc-pulse 3.2s ease-in-out ${TRANSITION_MS}ms infinite; }
 
         .tc-card[data-pos="center"] {
           transform: translateX(0) scale(1);
@@ -158,7 +164,6 @@ export function TestimonialsCarousel() {
             0 0 18px 2px rgba(57,232,121,.55),
             0 0 60px 6px rgba(57,232,121,.22),
             0 30px 60px -20px rgba(0,0,0,.6);
-          animation: tc-pulse 3.2s ease-in-out infinite;
         }
         .tc-card[data-pos="left"],
         .tc-card[data-pos="right"] {
@@ -173,8 +178,8 @@ export function TestimonialsCarousel() {
         .tc-card[data-pos="out-right"] { transform: translateX(calc(var(--tc-gap) * 2)) scale(.6); }
 
         @keyframes tc-pulse {
-          0%, 100% { transform: translateX(0) scale(1); }
-          50% { transform: translateX(0) scale(1.015); }
+          0%, 100% { opacity: 1; }
+          50% { opacity: .45; }
         }
 
         .tc-arrow {
@@ -206,7 +211,7 @@ export function TestimonialsCarousel() {
 
         @media (prefers-reduced-motion: reduce) {
           .tc-card, .tc-dot, .tc-arrow { transition: none !important; }
-          .tc-card[data-pos="center"] { animation: none; }
+          .tc-card[data-pos="center"]::after { animation: none; }
         }
       `}</style>
     </div>
