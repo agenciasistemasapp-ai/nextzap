@@ -126,7 +126,7 @@ export function HeroMockup({ src, alt }: { src: string; alt: string }) {
         }
         @keyframes hm-float {
           0%, 100% { transform: translate3d(0, 0, 0); }
-          50% { transform: translate3d(0, -13px, 0); }
+          50% { transform: translate3d(0, -15px, 0); }
         }
         /* Pulsação sincronizada com a flutuação: luz mais intensa quando o mockup está no alto */
         @keyframes hm-pulse {
@@ -158,13 +158,24 @@ export function HeroMockup({ src, alt }: { src: string; alt: string }) {
           .hm-floor { animation: none; opacity: .8; }
           .hm-tilt { transform: none; transition: none; }
         }
+        @keyframes hm-float-soft {
+          0%, 100% { transform: translate3d(0, 0, 0); }
+          50% { transform: translate3d(0, -8px, 0); }
+        }
         @keyframes hm-float-sm {
           0%, 100% { transform: translate3d(0, 0, 0); }
           50% { transform: translate3d(0, -10px, 0); }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .hm-float, .hm-glow, .hm-aura, .hm-halo, .hm-floor { animation: none !important; }
+          .hm-glow, .hm-aura, .hm-halo, .hm-floor { animation: none !important; }
+          /* Movimento reduzido (não desligado): flutuação mais curta e lenta, sem pulsar nem parallax.
+             Seletor mais específico para vencer a regra global que zera animações. */
+          .hm-zone .hm-float {
+            animation: hm-float-soft 6s ease-in-out infinite !important;
+            animation-duration: 6s !important;
+            animation-iteration-count: infinite !important;
+          }
           .hm-glow { opacity: .6; }
           .hm-aura { opacity: .8; }
           .hm-tilt { transform: none !important; transition: none !important; }
