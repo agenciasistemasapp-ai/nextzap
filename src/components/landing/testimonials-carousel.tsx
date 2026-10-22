@@ -128,14 +128,14 @@ export function TestimonialsCarousel() {
 
         .tc-stage {
           position: relative;
-          height: calc(var(--tc-w) * 1.778 + 28px);
+          height: calc(var(--tc-w) * 1.779 + 80px);
           overflow: hidden;
           touch-action: pan-y;
           -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
           mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
         }
         .tc-card {
-          position: absolute; top: 14px; left: 50%;
+          position: absolute; top: 40px; left: 50%;
           width: var(--tc-w); margin: 0 0 0 calc(var(--tc-w) / -2);
           aspect-ratio: 940 / 1672;
           border-radius: 22px;
