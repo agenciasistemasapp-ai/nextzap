@@ -165,7 +165,7 @@ export const createCompanyWithOwner = createServerFn({ method: "POST" })
     if (prof) ownerId = prof.user_id;
     let tempPassword: string | null = null;
     if (!ownerId) {
-      tempPassword = data.password ?? (Math.random().toString(36).slice(2, 10) + "A1!");
+      tempPassword = data.password ?? (await import("@/lib/security-utils")).randomPassword();
       const { data: c, error } = await supabaseAdmin.auth.admin.createUser({
         email: data.ownerEmail, password: tempPassword, email_confirm: true,
       });
@@ -303,7 +303,7 @@ export const resetCompanyOwnerPassword = createServerFn({ method: "POST" })
     const password =
       data.newPassword && data.newPassword.length >= 8
         ? data.newPassword
-        : Math.random().toString(36).slice(2, 10) + "A1!";
+        : (await import("@/lib/security-utils")).randomPassword();
 
     const { error: uErr } = await supabaseAdmin.auth.admin.updateUserById(owner.user_id, {
       password,

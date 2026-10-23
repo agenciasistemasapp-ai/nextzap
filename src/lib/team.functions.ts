@@ -93,7 +93,8 @@ export const inviteMember = createServerFn({ method: "POST" })
 
     let tempPassword: string | null = null;
     if (!targetUserId) {
-      tempPassword = Math.random().toString(36).slice(2, 10) + "A1!";
+      const { randomPassword } = await import("@/lib/security-utils");
+      tempPassword = randomPassword();
       const { data: created, error: cErr } = await supabaseAdmin.auth.admin.createUser({
         email: data.email,
         password: tempPassword,
@@ -122,7 +123,10 @@ export const inviteMember = createServerFn({ method: "POST" })
 
 export const setMemberActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { memberId: string; ativo: boolean }) => d)
+  .inputValidator((d: { memberId: string; ativo: boolean }) => {
+    if (typeof d?.memberId !== "string" || !/^[0-9a-f-]{36}$/i.test(d.memberId)) throw new Error("Membro inválido");
+    return { memberId: d.memberId, ativo: !!d.ativo };
+  })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { companyId, role } = await getOwnedCompanyId(supabase, userId);
@@ -131,19 +135,23 @@ export const setMemberActive = createServerFn({ method: "POST" })
       const { assertWithinLimit } = await import("./plan-limits.server");
       await assertWithinLimit(companyId, "usuarios");
     }
-    const { error } = await supabase.from("company_user").update({ ativo: data.ativo }).eq("id", data.memberId);
+    const { error } = await supabase.from("company_user").update({ ativo: data.ativo }).eq("id", data.memberId).eq("company_id", companyId);
     if (error) throw error;
     return { ok: true };
   });
 
 export const setMemberRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { memberId: string; role: "owner" | "admin" | "atendente" }) => d)
+  .inputValidator((d: { memberId: string; role: "owner" | "admin" | "atendente" }) => {
+    if (typeof d?.memberId !== "string" || !/^[0-9a-f-]{36}$/i.test(d.memberId)) throw new Error("Membro inválido");
+    if (!["owner", "admin", "atendente"].includes(d?.role)) throw new Error("Papel inválido");
+    return { memberId: d.memberId, role: d.role };
+  })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { role } = await getOwnedCompanyId(supabase, userId);
+    const { role, companyId } = await getOwnedCompanyId(supabase, userId);
     if (role !== "owner") throw new Error("Apenas o owner pode alterar papéis.");
-    const { error } = await supabase.from("company_user").update({ role: data.role }).eq("id", data.memberId);
+    const { error } = await supabase.from("company_user").update({ role: data.role }).eq("id", data.memberId).eq("company_id", companyId);
     if (error) throw error;
     return { ok: true };
   });
