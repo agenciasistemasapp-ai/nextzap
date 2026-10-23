@@ -308,7 +308,7 @@ Agora: ${formatSlotPt(now, ctx.tz)} (fuso ${ctx.tz}).`;
   });
 
   const { data: meus } = await admin.from("agendamento").select("inicio, servico, titulo")
-    .eq("company_id", companyId).eq("contato_numero", numero).in("status", ACTIVE)
+    .eq("company_id", companyId).in("contato_numero", numerosDoContato(numero)).in("status", ACTIVE)
     .gte("inicio", now.toISOString()).order("inicio", { ascending: true }).limit(3);
   const meusTxt = (meus ?? []).length
     ? (meus as any[]).map((m) => `• ${m.servico || m.titulo} — ${formatSlotPt(new Date(m.inicio), ctx.tz)}`).join("\n")
@@ -652,6 +652,9 @@ export async function executarAcaoAgenda(
       const newKey = `wa:${contato.numero}:${novo.toISOString()}`;
       const { data: upd, error } = await admin.from("agendamento").update({
         inicio: novo.toISOString(), fim: fim.toISOString(), idempotency_key: newKey,
+        // Novo horário: os lembretes recomeçam e a confirmação anterior não vale mais.
+        lembrete_24h_enviado_em: null, lembrete_1h_enviado_em: null,
+        aguardando_resposta_lembrete: false, cliente_confirmou_em: null, status: "agendado",
         google_sync_status: ag.google_sync_status === "nao_aplicavel" ? "nao_aplicavel" : "pendente",
       }).eq("id", ag.id).eq("company_id", companyId).in("status", ACTIVE).eq("inicio", ag.inicio).select("id");
       if (error) {
