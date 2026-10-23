@@ -231,6 +231,7 @@ function AgendaPage() {
                             {r.origem === "bloqueio" && <Ban className="size-3.5 text-muted-foreground" />}
                             {r.servico || r.titulo}
                             {cancelado && <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-[color:var(--panel-2)] flex items-center gap-1"><XCircle className="size-3" />Cancelado</span>}
+                            {r.status === "confirmado" && <span className="text-[11px] font-normal px-2 py-0.5 rounded-full bg-primary/15 text-primary">Confirmado pelo cliente</span>}
                           </div>
                           <div className="text-xs text-muted-foreground truncate">
                             {[r.contato_nome, r.contato_numero].filter(Boolean).join(" · ") || (r.origem === "bloqueio" ? "Horário bloqueado" : "—")}
