@@ -1,6 +1,7 @@
 import { BrandLogo } from "@/components/brand-logo";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { brand, supportWhatsappUrl } from "@/config/brand";
+import { WhatsappFloat } from "@/components/landing/whatsapp-float";
 import heroMockup from "@/assets/hero-desktop.webp";
 import { TestimonialsCarousel } from "@/components/landing/testimonials-carousel";
 import { HeroMockup } from "@/components/landing/hero-mockup";
@@ -105,6 +106,7 @@ function Landing() {
         <FinalCta onCta={cta} />
         <Footer />
       </div>
+      <WhatsappFloat />
 
       <style>{`
         html { scroll-behavior: smooth; }
