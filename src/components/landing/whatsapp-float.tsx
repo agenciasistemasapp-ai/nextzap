@@ -22,6 +22,8 @@ export function WhatsappFloat() {
         </svg>
       </span>
       <style>{`
+        /* a landing força "a { position: relative }"; aqui precisa ficar preso na tela */
+        a.wa-float.wa-float { position: fixed; z-index: 60; }
         .wa-float-btn { background: #25D366; box-shadow: 0 10px 30px -6px rgba(37,211,102,0.65), 0 0 0 1px rgba(255,255,255,0.12) inset; }
         .wa-float-ring { box-shadow: 0 0 0 0 rgba(37,211,102,0.55); animation: waPulse 2.4s ease-out infinite; }
         @keyframes waPulse {
