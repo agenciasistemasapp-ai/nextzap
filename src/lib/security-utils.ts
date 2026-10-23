@@ -7,8 +7,8 @@ export function safeEqual(a: string, b: string): boolean {
   const y = enc.encode(String(b ?? ""));
   let diff = x.length ^ y.length;
   const n = Math.max(x.length, y.length);
-  for (let i = 0; i < n; i++) diff |= (x[i % (x.length || 1)] ?? 0) ^ (y[i % (y.length || 1)] ?? 0);
-  return diff === 0 && x.length === y.length;
+  for (let i = 0; i < n; i++) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
+  return diff === 0;
 }
 
 /** Senha temporária com gerador criptográfico (não Math.random). */
