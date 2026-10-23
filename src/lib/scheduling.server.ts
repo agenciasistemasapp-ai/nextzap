@@ -5,7 +5,8 @@
 import {
   checkSlot, firstName, formatSlotPt, formatSlotsForPrompt, hasAnyOpenDay,
   listAvailableSlots, MSG, nearestAlternatives, parseAiDateTime, parseAntecedenciaMin, parseDurationMin,
-  parseServicos, findServico, zonedToUtc, type Interval, type Servico, type SlotRules,
+  parseServicos, findServico, zonedToUtc, lembreteDevido, respostaLembrete,
+  type Interval, type LembreteTipo, type Servico, type SlotRules,
 } from "@/lib/scheduling";
 import type { DaySchedule } from "@/lib/business-hours";
 
@@ -464,11 +465,141 @@ export async function cancelarAgendamento(admin: any, companyId: string, id: str
   return row;
 }
 
+/** Número como o WhatsApp entrega (55 + DDD + número) e a forma digitada sem o 55. */
+function numerosDoContato(numero: string): string[] {
+  const d = String(numero || "").replace(/\D/g, "");
+  const out = new Set<string>([d]);
+  if (d.startsWith("55") && (d.length === 12 || d.length === 13)) out.add(d.slice(2));
+  if (d.length === 10 || d.length === 11) out.add(`55${d}`);
+  return [...out].filter(Boolean);
+}
+
+/** Número para envio: lançamentos manuais podem vir sem o código do país. */
+function numeroParaEnvio(numero: string): string {
+  const d = String(numero || "").replace(/\D/g, "");
+  return d.length === 10 || d.length === 11 ? `55${d}` : d;
+}
+
 async function proximoDoContato(admin: any, companyId: string, numero: string) {
   const { data } = await admin.from("agendamento").select("*")
-    .eq("company_id", companyId).eq("contato_numero", numero).in("status", ACTIVE)
+    .eq("company_id", companyId).in("contato_numero", numerosDoContato(numero)).in("status", ACTIVE)
     .gte("inicio", new Date().toISOString()).order("inicio", { ascending: true }).limit(1).maybeSingle();
   return data;
+}
+
+// ---------------- Lembretes (1 dia e 1 hora antes) ----------------
+
+/**
+ * Envia os lembretes que venceram. Chamado pelo agendador a cada poucos minutos.
+ * Cada lembrete é "reservado" no banco antes do envio, então duas execuções simultâneas
+ * não mandam o mesmo lembrete duas vezes; se o envio falhar, a reserva é desfeita.
+ */
+export async function enviarLembretesPendentes(admin: any, now = new Date()) {
+  const { data: rows, error } = await admin.from("agendamento")
+    .select("id, company_id, servico, titulo, inicio, created_at, contato_numero, contato_nome, card_id, lembrete_24h_enviado_em, lembrete_1h_enviado_em, cliente_confirmou_em")
+    .in("status", ACTIVE).not("contato_numero", "is", null).neq("origem", "bloqueio")
+    .gt("inicio", now.toISOString()).lte("inicio", new Date(now.getTime() + 24 * 3600_000).toISOString())
+    .or("lembrete_24h_enviado_em.is.null,lembrete_1h_enviado_em.is.null")
+    .order("inicio", { ascending: true }).limit(200);
+  if (error) throw new Error(`Falha ao buscar lembretes: ${error.message}`);
+
+  const devidos = (rows ?? []).map((r: any) => ({
+    r,
+    tipo: lembreteDevido({
+      inicio: new Date(r.inicio), criadoEm: new Date(r.created_at), now,
+      enviado24h: !!r.lembrete_24h_enviado_em, enviado1h: !!r.lembrete_1h_enviado_em,
+    }),
+  })).filter((x: any) => x.tipo) as Array<{ r: any; tipo: LembreteTipo }>;
+
+  const porEmpresa = new Map<string, typeof devidos>();
+  for (const d of devidos) {
+    const l = porEmpresa.get(d.r.company_id) ?? [];
+    l.push(d); porEmpresa.set(d.r.company_id, l);
+  }
+
+  const { evoSendText } = await import("@/lib/evolution.server");
+  const res = { enviados: 0, falhas: 0, ignorados: 0 };
+
+  for (const [companyId, itens] of porEmpresa) {
+    const [{ data: cfg }, { data: inst }] = await Promise.all([
+      admin.from("agent_config").select("lembretes_ativos, horarios_atendimento").eq("company_id", companyId).maybeSingle(),
+      admin.from("whatsapp_instances").select("instance_name, status, user_id").eq("company_id", companyId).maybeSingle(),
+    ]);
+    if (cfg?.lembretes_ativos === false || !inst || inst.status !== "open") { res.ignorados += itens.length; continue; }
+    const tz = (cfg?.horarios_atendimento?.timezone as string) || "America/Sao_Paulo";
+
+    for (const { r, tipo } of itens) {
+      const col = tipo === "24h" ? "lembrete_24h_enviado_em" : "lembrete_1h_enviado_em";
+      const { data: claimed } = await admin.from("agendamento").update({ [col]: now.toISOString() })
+        .eq("id", r.id).is(col, null).in("status", ACTIVE).select("id");
+      if (!claimed?.length) continue;
+
+      const servico = r.servico || r.titulo || "atendimento";
+      const quando = formatSlotPt(new Date(r.inicio), tz);
+      const nome = firstName(r.contato_nome);
+      const jaConfirmou = !!r.cliente_confirmou_em;
+      const texto = tipo === "24h" ? MSG.lembrete24h(nome, servico, quando) : MSG.lembrete1h(nome, servico, quando, jaConfirmou);
+      const destino = numeroParaEnvio(r.contato_numero);
+      try {
+        await evoSendText(inst.instance_name, destino, texto);
+      } catch (e: any) {
+        console.error("[lembrete.envio]", r.id, e?.message);
+        await admin.from("agendamento").update({ [col]: null }).eq("id", r.id);
+        res.falhas++;
+        continue;
+      }
+      if (!jaConfirmou) await admin.from("agendamento").update({ aguardando_resposta_lembrete: true }).eq("id", r.id);
+      await admin.from("mensagens").insert({
+        company_id: companyId, user_id: inst.user_id, numero: destino, contato_nome: r.contato_nome ?? null,
+        direcao: "saida", autor: "sistema", texto,
+      });
+      await logLead(admin, companyId, r.card_id, "lembrete_enviado", `Lembrete ${tipo === "24h" ? "de 1 dia" : "de 1 hora"} — ${servico}, ${quando}`);
+      res.enviados++;
+    }
+  }
+  return res;
+}
+
+/**
+ * Resposta do cliente a um lembrete ("1", "2", "sim", "cancelar"...).
+ * Devolve a mensagem a enviar, ou null quando não há lembrete aguardando resposta.
+ */
+export async function tratarRespostaLembrete(admin: any, companyId: string, numero: string, text: string): Promise<string | null> {
+  const tipo = respostaLembrete(text);
+  if (!tipo) return null;
+  const { data: ag } = await admin.from("agendamento").select("*")
+    .eq("company_id", companyId).in("contato_numero", numerosDoContato(numero))
+    .eq("aguardando_resposta_lembrete", true).in("status", ACTIVE)
+    .gt("inicio", new Date().toISOString()).order("inicio", { ascending: true }).limit(1).maybeSingle();
+  if (!ag) return null;
+
+  const { data: cfg } = await admin.from("agent_config").select("horarios_atendimento").eq("company_id", companyId).maybeSingle();
+  const tz = (cfg?.horarios_atendimento?.timezone as string) || "America/Sao_Paulo";
+  const servico = ag.servico || ag.titulo || "atendimento";
+  const quando = formatSlotPt(new Date(ag.inicio), tz);
+
+  if (tipo === "confirmar") {
+    const { data: upd } = await admin.from("agendamento")
+      .update({ status: "confirmado", cliente_confirmou_em: new Date().toISOString(), aguardando_resposta_lembrete: false })
+      .eq("id", ag.id).eq("aguardando_resposta_lembrete", true).in("status", ACTIVE).select("id");
+    if (!upd?.length) return null;
+    await logLead(admin, companyId, ag.card_id, "agendamento_confirmado_cliente", `${servico} — ${quando}`);
+    return MSG.presencaConfirmada(firstName(ag.contato_nome), servico, quando);
+  }
+
+  if (tipo === "cancelar") {
+    const done = await cancelarAgendamento(admin, companyId, ag.id);
+    await admin.from("agendamento").update({ aguardando_resposta_lembrete: false }).eq("id", ag.id);
+    if (!done) return null;
+    await logLead(admin, companyId, ag.card_id, "agendamento_cancelado", `${servico} — ${quando} (resposta ao lembrete)`);
+    return MSG.cancelado(servico, quando);
+  }
+
+  // "2"/"não": pergunta se quer remarcar ou cancelar; a IA continua a conversa com os marcadores de sempre.
+  const { data: upd } = await admin.from("agendamento").update({ aguardando_resposta_lembrete: false })
+    .eq("id", ag.id).eq("aguardando_resposta_lembrete", true).select("id");
+  if (!upd?.length) return null;
+  return MSG.perguntarAlteracao(servico, quando);
 }
 
 // ---------------- Orquestração para o webhook ----------------
