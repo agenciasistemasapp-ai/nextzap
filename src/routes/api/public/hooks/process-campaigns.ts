@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { authenticateCronRequest } from "@/integrations/supabase/cron-auth";
 
 /**
  * Worker chamado por pg_cron a cada minuto.
@@ -7,7 +8,9 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/public/hooks/process-campaigns")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const authFailure = await authenticateCronRequest(request);
+        if (authFailure) return authFailure;
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { evoSendText } = await import("@/lib/evolution.server");
@@ -113,7 +116,7 @@ export const Route = createFileRoute("/api/public/hooks/process-campaigns")({
           return Response.json({ ok: true, processed });
         } catch (e: any) {
           console.error("[process-campaigns]", e);
-          return new Response(JSON.stringify({ ok: false, error: String(e?.message ?? e) }), { status: 500 });
+          return Response.json({ ok: false, error: "internal_error" }, { status: 500 });
         }
       },
     },

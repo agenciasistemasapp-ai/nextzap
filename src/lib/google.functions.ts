@@ -18,9 +18,10 @@ export const startGoogleOAuth = createServerFn({ method: "POST" })
     }
     const { supabase, userId } = context;
     const { data: cu } = await supabase
-      .from("company_user").select("company_id").eq("user_id", userId).eq("ativo", true)
+      .from("company_user").select("company_id, role").eq("user_id", userId).eq("ativo", true)
       .order("created_at", { ascending: true }).limit(1).maybeSingle();
     if (!cu) return { ok: false as const, error: "Sem empresa." };
+    if (!["owner", "admin"].includes((cu as any).role)) return { ok: false as const, error: "Apenas o dono ou um admin pode conectar o Google Agenda." };
 
     const { getCompanyPlan } = await import("@/lib/plan-limits.server");
     const { featuresFor, PLAN_LABEL } = await import("@/lib/plan-features");

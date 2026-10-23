@@ -33,7 +33,7 @@ async function handle(request: Request) {
       let q = (supabaseAdmin as any).from("mensagens")
         .select("id, numero, direcao, autor, texto, created_at")
         .eq("company_id", companyId).order("created_at", { ascending: false }).limit(100);
-      if (numero) q = q.eq("numero", numero);
+      if (numero) q = q.eq("numero", numero.replace(/\D/g, "").slice(0, 15));
       const { data } = await q;
       return Response.json({ data: data ?? [] });
     }
@@ -44,8 +44,10 @@ async function handle(request: Request) {
     const body = await request.json().catch(() => ({})) as any;
     if (resource === "messages") {
       const numero = String(body.numero || "").replace(/\D/g, "");
-      const texto = String(body.texto || "");
+      const texto = String(body.texto || "").trim();
       if (!numero || !texto) return new Response(JSON.stringify({ error: "numero e texto obrigatórios" }), { status: 400 });
+      if (numero.length < 10 || numero.length > 15) return new Response(JSON.stringify({ error: "numero inválido" }), { status: 400 });
+      if (texto.length > 4096) return new Response(JSON.stringify({ error: "texto muito longo (máx. 4096)" }), { status: 400 });
       const { data: inst } = await (supabaseAdmin as any).from("whatsapp_instances")
         .select("instance_name, status").eq("company_id", companyId).maybeSingle();
       if (!inst || inst.status !== "open") return new Response(JSON.stringify({ error: "WhatsApp não conectado" }), { status: 400 });
@@ -58,7 +60,8 @@ async function handle(request: Request) {
         });
         return Response.json({ ok: true });
       } catch (e: any) {
-        return new Response(JSON.stringify({ error: String(e?.message ?? e) }), { status: 500 });
+        console.error("[api.v1.send]", e?.message);
+        return new Response(JSON.stringify({ error: "Falha ao enviar a mensagem" }), { status: 502 });
       }
     }
     return new Response(JSON.stringify({ error: "Unknown resource" }), { status: 400 });

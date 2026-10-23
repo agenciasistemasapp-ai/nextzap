@@ -15,7 +15,7 @@ export const Route = createFileRoute("/api/public/jobs/send-reminders")({
           return Response.json({ ok: true, ...r });
         } catch (e: any) {
           console.error("[send-reminders]", e?.message);
-          return Response.json({ ok: false, error: String(e?.message ?? e) }, { status: 500 });
+          return Response.json({ ok: false, error: "internal_error" }, { status: 500 });
         }
       },
     },

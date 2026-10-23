@@ -22,11 +22,20 @@ export async function emitWebhook(companyId: string, event: OutboundEvent, paylo
     if (!list.length) return;
 
     const body = JSON.stringify({ event, company_id: companyId, data: payload, timestamp: new Date().toISOString() });
+    const { checkOutboundUrl } = await import("@/lib/security-utils");
     await Promise.all(list.map(async (ep: any) => {
+      const dest = checkOutboundUrl(ep.url);
+      if (!dest.ok) {
+        await (supabaseAdmin as any).from("webhook_delivery_log").insert({
+          company_id: companyId, endpoint_id: ep.id, evento: event, status_code: null, erro: `Bloqueado: ${dest.error}`,
+        });
+        return;
+      }
       const sig = createHmac("sha256", ep.secret).update(body).digest("hex");
       let status: number | null = null; let erro: string | null = null;
       try {
-        const r = await fetch(ep.url, {
+        const r = await fetch(dest.url, {
+          redirect: "manual",
           method: "POST",
           headers: {
             "Content-Type": "application/json",

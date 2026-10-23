@@ -30,8 +30,15 @@ export const getMyCredits = createServerFn({ method: "GET" })
 // Admin: adiciona/remove créditos numa empresa
 export const adminGrantCredits = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { companyId: string; qtd: number; motivo?: string }) => d)
+  .inputValidator((d: { companyId: string; qtd: number; motivo?: string }) => {
+    if (typeof d?.companyId !== "string" || !/^[0-9a-f-]{36}$/i.test(d.companyId)) throw new Error("Empresa inválida");
+    const qtd = Math.trunc(Number(d?.qtd));
+    if (!Number.isFinite(qtd) || qtd === 0 || Math.abs(qtd) > 1_000_000) throw new Error("Quantidade inválida");
+    return { companyId: d.companyId, qtd, motivo: String(d?.motivo ?? "").trim().slice(0, 120) || undefined };
+  })
   .handler(async ({ data, context }) => {
+    const { data: isSuper } = await context.supabase.rpc("is_super_admin");
+    if (!isSuper) throw new Error("Acesso negado");
     const { data: novo, error } = await context.supabase.rpc("grant_credits", {
       _company_id: data.companyId,
       _qtd: data.qtd,

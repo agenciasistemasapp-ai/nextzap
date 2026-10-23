@@ -1,21 +1,32 @@
 import { createHmac } from "node:crypto";
+import { safeEqual } from "@/lib/security-utils";
+
+const STATE_TTL_MS = 30 * 60_000;
+
+function stateSecret(): string {
+  const s = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!s) throw new Error("Configuração do servidor incompleta");
+  return `google-oauth-state:${s}`;
+}
 
 export function signState(payload: string) {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || "fallback";
-  const sig = createHmac("sha256", secret).update(payload).digest("hex").slice(0, 16);
+  const sig = createHmac("sha256", stateSecret()).update(payload).digest("hex");
   return `${payload}.${sig}`;
 }
 
+/** Valida assinatura (comparação segura) e validade de 30 min do pedido de conexão. */
 export function verifyState(state: string): { companyId: string } | null {
-  const parts = state.split(".");
+  const parts = String(state || "").split(".");
   if (parts.length !== 2) return null;
   const [payload, sig] = parts;
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY || "fallback";
-  const expected = createHmac("sha256", secret).update(payload).digest("hex").slice(0, 16);
-  if (sig !== expected) return null;
+  let expected: string;
+  try { expected = createHmac("sha256", stateSecret()).update(payload).digest("hex"); } catch { return null; }
+  if (!safeEqual(sig, expected)) return null;
   try {
     const obj = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    if (!obj.companyId) return null;
+    if (typeof obj.companyId !== "string" || !/^[0-9a-f-]{36}$/i.test(obj.companyId)) return null;
+    const t = Number(obj.t);
+    if (!Number.isFinite(t) || Date.now() - t > STATE_TTL_MS || t - Date.now() > 60_000) return null;
     return { companyId: obj.companyId as string };
   } catch {
     return null;
