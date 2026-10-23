@@ -132,6 +132,31 @@ export const Route = createFileRoute("/api/public/whatsapp-webhook")({
             descricao: p.descricao,
           }));
 
+          // Resposta a lembrete de agendamento ("1" confirma, "2" remarca/cancela).
+          // Vem antes do opt-out para "cancelar" cancelar o horário, e não pausar o contato.
+          try {
+            const { respostaLembrete } = await import("@/lib/scheduling");
+            if (respostaLembrete(text)) {
+              const { data: pz } = await supabaseAdmin
+                .from("contact_pause").select("pausado").eq("company_id", companyId).eq("numero", number).maybeSingle();
+              if (!pz?.pausado) {
+                const { tratarRespostaLembrete } = await import("@/lib/scheduling.server");
+                const resposta = await tratarRespostaLembrete(supabaseAdmin, companyId, number, text);
+                if (resposta) {
+                  await evoSendText(instanceName, number, resposta);
+                  await supabaseAdmin.from("mensagens").insert({
+                    company_id: companyId, user_id: userId, numero: number, contato_nome: pushName ?? null,
+                    direcao: "saida", autor: "sistema", texto: resposta,
+                  });
+                  await upsertCard(supabaseAdmin, companyId, userId, number, pushName, resposta, stages);
+                  return new Response("reminder-reply", { status: 200 });
+                }
+              }
+            }
+          } catch (e: any) {
+            console.error("[lembrete.resposta]", e?.message);
+          }
+
           if (isOptOutMessage(lower)) {
             await supabaseAdmin
               .from("contact_pause")

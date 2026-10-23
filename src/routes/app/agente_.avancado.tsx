@@ -49,7 +49,7 @@ const DEFAULTS: any = {
   pode_brincar: false, assinar_mensagens: false, proatividade: 50,
   velocidade_resposta: "humana", evitar_palavras: "", idioma: "pt-BR",
   agendamento_ativo: false, servicos_agendaveis: "", duracao_padrao: "30 min",
-  horarios_disponiveis: "", antecedencia_min: "2 horas",
+  horarios_disponiveis: "", antecedencia_min: "2 horas", lembretes_ativos: true,
 };
 
 
@@ -534,6 +534,10 @@ function AgentePage() {
                   </div>
                 </div>
                 <Toggle label="Agendamento ativo" v={cfg.agendamento_ativo} on={(v) => up("agendamento_ativo", v)} />
+                <Toggle label="Lembretes no WhatsApp (1 dia e 1 hora antes)" v={cfg.lembretes_ativos !== false} on={(v) => up("lembretes_ativos", v)} />
+                <p className="text-xs text-muted-foreground -mt-1">
+                  O cliente recebe o lembrete e responde 1 para confirmar ou 2 para remarcar ou cancelar. Quem confirma aparece como "Confirmado" na Agenda.
+                </p>
                 <Area label="Serviços agendáveis" value={cfg.servicos_agendaveis} onChange={(v) => up("servicos_agendaveis", v)} rows={2} />
                 <div className="grid sm:grid-cols-3 gap-3">
                   <Field label="Duração padrão" value={cfg.duracao_padrao} onChange={(v) => up("duracao_padrao", v)} />

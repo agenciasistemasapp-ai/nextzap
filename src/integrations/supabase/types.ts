@@ -16,8 +16,10 @@ export type Database = {
     Tables: {
       agendamento: {
         Row: {
+          aguardando_resposta_lembrete: boolean
           cancelado_em: string | null
           card_id: string | null
+          cliente_confirmou_em: string | null
           company_id: string
           contato_nome: string | null
           contato_numero: string | null
@@ -31,6 +33,8 @@ export type Database = {
           id: string
           idempotency_key: string | null
           inicio: string
+          lembrete_1h_enviado_em: string | null
+          lembrete_24h_enviado_em: string | null
           origem: string
           recurso: string
           servico: string | null
@@ -39,8 +43,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          aguardando_resposta_lembrete?: boolean
           cancelado_em?: string | null
           card_id?: string | null
+          cliente_confirmou_em?: string | null
           company_id: string
           contato_nome?: string | null
           contato_numero?: string | null
@@ -54,6 +60,8 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           inicio: string
+          lembrete_1h_enviado_em?: string | null
+          lembrete_24h_enviado_em?: string | null
           origem?: string
           recurso?: string
           servico?: string | null
@@ -62,8 +70,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          aguardando_resposta_lembrete?: boolean
           cancelado_em?: string | null
           card_id?: string | null
+          cliente_confirmou_em?: string | null
           company_id?: string
           contato_nome?: string | null
           contato_numero?: string | null
@@ -77,6 +87,8 @@ export type Database = {
           id?: string
           idempotency_key?: string | null
           inicio?: string
+          lembrete_1h_enviado_em?: string | null
+          lembrete_24h_enviado_em?: string | null
           origem?: string
           recurso?: string
           servico?: string | null
@@ -127,6 +139,7 @@ export type Database = {
           horarios_atendimento: Json
           horarios_disponiveis: string
           idioma: string | null
+          lembretes_ativos: boolean
           mensagem_fora_horario: string
           nao_pode_fazer: string
           nome_agente: string
@@ -189,6 +202,7 @@ export type Database = {
           horarios_atendimento?: Json
           horarios_disponiveis?: string
           idioma?: string | null
+          lembretes_ativos?: boolean
           mensagem_fora_horario?: string
           nao_pode_fazer?: string
           nome_agente?: string
@@ -251,6 +265,7 @@ export type Database = {
           horarios_atendimento?: Json
           horarios_disponiveis?: string
           idioma?: string | null
+          lembretes_ativos?: boolean
           mensagem_fora_horario?: string
           nao_pode_fazer?: string
           nome_agente?: string
