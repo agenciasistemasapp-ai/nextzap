@@ -8,6 +8,13 @@
       "when": 1792500659406,
       "tag": "0000_agendamento_reserva_segura",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792755216255,
+      "tag": "0001_migration",
+      "breakpoints": true
     }
   ]
 }
