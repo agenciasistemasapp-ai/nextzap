@@ -361,4 +361,46 @@ export const MSG = {
     (alternativas.length
       ? `Esse novo horário não está disponível. Tenho ${joinOptions(alternativas)}.`
       : `Esse novo horário não está disponível.`) + ` Seu horário original (${original}) continua reservado.`,
+  lembrete24h: (nome: string, servico: string, quando: string) =>
+    `Olá${nome ? `, ${nome}` : ""}! Passando para lembrar do seu horário: ${servico}, ${quando}.\n\nResponda *1* para confirmar ou *2* para remarcar ou cancelar.`,
+  lembrete1h: (nome: string, servico: string, quando: string, jaConfirmou: boolean) =>
+    jaConfirmou
+      ? `${nome ? `${nome}, s` : "S"}eu horário de ${servico} é daqui a pouco: ${quando}. Te esperamos!`
+      : `${nome ? `${nome}, s` : "S"}eu horário de ${servico} é daqui a pouco: ${quando}.\n\nResponda *1* para confirmar ou *2* para remarcar ou cancelar.`,
+  presencaConfirmada: (nome: string, servico: string, quando: string) =>
+    `Obrigado${nome ? `, ${nome}` : ""}! Sua presença está confirmada: ${servico}, ${quando}. Te esperamos!`,
+  perguntarAlteracao: (servico: string, quando: string) =>
+    `Sem problemas! Seu horário de ${servico} (${quando}) continua reservado por enquanto. Você prefere remarcar para outro dia e horário ou cancelar?`,
 };
+
+// ---------------- Lembretes ----------------
+
+export type LembreteTipo = "24h" | "1h";
+
+/**
+ * Qual lembrete enviar agora (ou nenhum).
+ * - 1 dia antes: entre 24h e 2h antes do início, só se o cliente marcou com mais de 26h de folga.
+ * - 1 hora antes: entre 60 e 10 min antes do início, só se marcou com mais de 2h de folga.
+ */
+export function lembreteDevido(a: {
+  inicio: Date; criadoEm: Date; now: Date;
+  enviado24h: boolean; enviado1h: boolean;
+}): LembreteTipo | null {
+  const ate = a.inicio.getTime() - a.now.getTime();
+  const folga = a.inicio.getTime() - a.criadoEm.getTime();
+  const H = 3600_000, M = 60_000;
+  if (ate <= 10 * M) return null;
+  if (!a.enviado1h && ate <= 60 * M && folga > 2 * H) return "1h";
+  if (!a.enviado24h && ate <= 24 * H && ate > 2 * H && folga > 26 * H) return "24h";
+  return null;
+}
+
+/** Interpreta a resposta do cliente a um lembrete. null = não é resposta ao lembrete. */
+export function respostaLembrete(text: string): "confirmar" | "alterar" | "cancelar" | null {
+  const n = normalize(text).replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  if (!n || n.length > 40) return null;
+  if (/^1( |$)/.test(n) || /^(sim|s|confirmo|confirmado|confirmar|confirma|ok|pode confirmar|sim confirmo|estarei ai|vou sim|com certeza)$/.test(n)) return "confirmar";
+  if (/^(cancelar|cancela|cancelo|quero cancelar|pode cancelar)$/.test(n)) return "cancelar";
+  if (/^2( |$)/.test(n) || /^(nao|n|remarcar|remarca|quero remarcar|nao vou|nao posso|nao vou poder|mudar|trocar|outro horario)$/.test(n)) return "alterar";
+  return null;
+}
