@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   checkSlot, listAvailableSlots, looksLikeBookingConfirmation, nearestAlternatives, parseAiDateTime,
-  parseAntecedenciaMin, parseDurationMin, parseServicos, findServico, formatSlotPt, type SlotRules,
+  parseAntecedenciaMin, parseDurationMin, parseServicos, findServico, formatSlotPt, lembreteDevido, respostaLembrete, type SlotRules,
 } from "@/lib/scheduling";
 import { parseAiOutput, buildSystemPrompt } from "@/lib/ai-prompt";
 
@@ -157,5 +157,37 @@ describe("IA não confirma sozinha", () => {
   it("sem agenda ativa, mantém o comportamento anterior", () => {
     const p = buildSystemPrompt({ agendamento_ativo: false } as any, {});
     expect(p).toContain("ENVIE A CONFIRMAÇÃO COMPLETA NA MESMA RESPOSTA");
+  });
+});
+
+describe("lembretes 1 dia e 1 hora antes", () => {
+  const H = 3600_000;
+  const inicio = new Date("2026-10-22T13:00:00Z");
+  const criadoCedo = new Date(inicio.getTime() - 3 * 24 * H);
+  const base = { inicio, criadoEm: criadoCedo, enviado24h: false, enviado1h: false };
+  it("manda o de 1 dia quando faltam 24h", () => {
+    expect(lembreteDevido({ ...base, now: new Date(inicio.getTime() - 24 * H) })).toBe("24h");
+    expect(lembreteDevido({ ...base, now: new Date(inicio.getTime() - 25 * H) })).toBeNull();
+  });
+  it("manda o de 1 hora quando falta 1h, mesmo após o de 1 dia", () => {
+    expect(lembreteDevido({ ...base, enviado24h: true, now: new Date(inicio.getTime() - 60 * 60_000) })).toBe("1h");
+    expect(lembreteDevido({ ...base, enviado24h: true, now: new Date(inicio.getTime() - 61 * 60_000) })).toBeNull();
+  });
+  it("não repete lembrete já enviado", () => {
+    expect(lembreteDevido({ ...base, enviado24h: true, now: new Date(inicio.getTime() - 20 * H) })).toBeNull();
+    expect(lembreteDevido({ ...base, enviado24h: true, enviado1h: true, now: new Date(inicio.getTime() - 30 * 60_000) })).toBeNull();
+  });
+  it("quem marcou para daqui a poucas horas não recebe o de 1 dia", () => {
+    const criado = new Date(inicio.getTime() - 5 * H);
+    expect(lembreteDevido({ ...base, criadoEm: criado, now: new Date(inicio.getTime() - 4 * H) })).toBeNull();
+    expect(lembreteDevido({ ...base, criadoEm: criado, now: new Date(inicio.getTime() - 50 * 60_000) })).toBe("1h");
+  });
+  it("lê respostas 1 / 2 / cancelar", () => {
+    expect(respostaLembrete("1")).toBe("confirmar");
+    expect(respostaLembrete("Sim, confirmo")).toBe("confirmar");
+    expect(respostaLembrete("2")).toBe("alterar");
+    expect(respostaLembrete("não vou poder")).toBe("alterar");
+    expect(respostaLembrete("Cancelar")).toBe("cancelar");
+    expect(respostaLembrete("Qual o valor da limpeza de pele?")).toBeNull();
   });
 });
