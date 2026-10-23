@@ -1,6 +1,8 @@
 // Feature flags por plano. Client-safe (sem segredos).
 // Os limites numéricos vivem na tabela `plan` (limite_*); este arquivo cobre
 // features booleanas que o front precisa ler para esconder/bloquear UI.
+// Agendamento interno + lembretes valem para todos os planos; só a
+// sincronização com o Google Agenda depende de `googleCalendar`.
 
 export type PlanSlug = "starter" | "pro" | "business";
 
