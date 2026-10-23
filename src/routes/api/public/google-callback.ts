@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyState } from "@/lib/google.server";
+import { escapeHtml } from "@/lib/security-utils";
 
 export const Route = createFileRoute("/api/public/google-callback")({
   server: {
@@ -27,7 +28,8 @@ export const Route = createFileRoute("/api/public/google-callback")({
         });
         const tok = await tokRes.json();
         if (!tok.access_token) {
-          return new Response(`token exchange failed: ${JSON.stringify(tok)}`, { status: 400 });
+          console.error("[google-callback] token exchange failed", tok?.error);
+          return new Response("Não foi possível conectar o Google Agenda. Tente novamente.", { status: 400 });
         }
 
         // Get email
@@ -57,7 +59,7 @@ export const Route = createFileRoute("/api/public/google-callback")({
           `<!doctype html><meta charset="utf-8"><title>Google conectado</title>
 <body style="font-family:system-ui;background:#081410;color:#e5f3ea;display:grid;place-items:center;min-height:100vh;margin:0">
 <div style="text-align:center;padding:24px">
-<h1>✅ Google Agenda conectado${email ? ` (${email})` : ""}</h1>
+<h1>✅ Google Agenda conectado${email ? ` (${escapeHtml(email)})` : ""}</h1>
 <p>Pode fechar esta aba.</p>
 <script>setTimeout(()=>{window.close();location.href="/app/agente"},1500)</script>
 </div></body>`,
