@@ -782,7 +782,7 @@ function Pricing({ onCta }: { onCta: (p: "/entrar" | "/demo/dashboard" | "#plano
             </div>
           ))}
         </div>
-        <p className="mt-5 text-center text-xs text-white/40">Cartão é exigido apenas para liberar o trial. Cancele em até 3 dias e não pagamos nada.</p>
+        <p className="mt-5 text-center text-xs text-white/40">Não precisa adicionar cartão, adquira um plano e só pague após os 3 dias de testes grátis.</p>
       </div>
     </section>
   );
