@@ -32,6 +32,22 @@ export const listAuditLog = createServerFn({ method: "GET" })
   });
 
 // ---------- LGPD export ----------
+// Chaves e tokens não saem no arquivo exportado (ficam só no servidor).
+const SECRET_COLS: Record<string, string[]> = {
+  agent_config: ["openai_api_key", "anthropic_api_key"],
+  whatsapp_instances: ["webhook_token"],
+  webhook_endpoint: ["secret"],
+  api_token: ["token"],
+  company_user: ["convite_token"],
+};
+function stripSecrets(table: string, row: any) {
+  const cols = SECRET_COLS[table];
+  if (!cols || !row) return row;
+  const copy = { ...row };
+  for (const c of cols) if (c in copy) copy[c] = copy[c] ? "[removido]" : copy[c];
+  return copy;
+}
+
 export const exportLgpd = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -54,7 +70,7 @@ export const exportLgpd = createServerFn({ method: "POST" })
           ? tbl.select("*").eq("user_id", context.userId)
           : tbl.select("*").eq("company_id", cid);
         const { data } = await q;
-        out[t] = data ?? [];
+        out[t] = (data ?? []).map((row: any) => stripSecrets(t, row));
       } catch { out[t] = []; }
     }
     const { writeAudit } = await import("./audit.server");

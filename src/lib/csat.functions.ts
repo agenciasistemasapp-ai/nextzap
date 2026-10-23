@@ -47,22 +47,33 @@ export const sendCsat = createServerFn({ method: "POST" })
   });
 
 export const submitCsat = createServerFn({ method: "POST" })
-  .inputValidator((d: { token: string; score: number; comentario?: string }) => d)
+  .inputValidator((d: { token: string; score: number; comentario?: string }) => {
+    const token = String(d?.token ?? "");
+    const score = Number(d?.score);
+    if (!/^[A-Za-z0-9_-]{8,128}$/.test(token) || !Number.isInteger(score) || score < 1 || score > 5) throw new Error("Dados inválidos.");
+    const comentario = typeof d?.comentario === "string" ? d.comentario.trim().slice(0, 1000) : "";
+    return { token, score, comentario };
+  })
   .handler(async ({ data }) => {
-    if (!data.token || data.score < 1 || data.score > 5) throw new Error("Dados inválidos.");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await (supabaseAdmin as any).from("csat_response").select("id, respondido_em").eq("token", data.token).maybeSingle();
     if (!row) throw new Error("Pesquisa não encontrada.");
     if (row.respondido_em) throw new Error("Pesquisa já respondida.");
-    const { error } = await (supabaseAdmin as any).from("csat_response").update({
-      score: data.score, comentario: data.comentario ?? null, respondido_em: new Date().toISOString(),
-    }).eq("id", row.id);
-    if (error) throw new Error(error.message);
+    // Atualização condicional: duas respostas simultâneas não sobrescrevem uma à outra.
+    const { data: upd, error } = await (supabaseAdmin as any).from("csat_response").update({
+      score: data.score, comentario: data.comentario || null, respondido_em: new Date().toISOString(),
+    }).eq("id", row.id).is("respondido_em", null).select("id");
+    if (error) throw new Error("Não foi possível registrar sua resposta.");
+    if (!upd?.length) throw new Error("Pesquisa já respondida.");
     return { ok: true };
   });
 
 export const getCsatByToken = createServerFn({ method: "POST" })
-  .inputValidator((d: { token: string }) => d)
+  .inputValidator((d: { token: string }) => {
+    const token = String(d?.token ?? "");
+    if (!/^[A-Za-z0-9_-]{8,128}$/.test(token)) throw new Error("Pesquisa não encontrada.");
+    return { token };
+  })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: row } = await (supabaseAdmin as any)

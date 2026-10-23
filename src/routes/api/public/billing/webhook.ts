@@ -155,7 +155,8 @@ export const Route = createFileRoute("/api/public/billing/webhook")({
           return new Response("provider inválido", { status: 400 });
         }
         const expected = process.env[tokenEnv(provider)];
-        if (!expected || token !== expected) {
+        const { safeEqual } = await import("@/lib/security-utils");
+        if (!expected || !safeEqual(token, expected)) {
           return new Response("token inválido", { status: 401 });
         }
 
@@ -187,7 +188,7 @@ export const Route = createFileRoute("/api/public/billing/webhook")({
               error: String(e?.message || e),
             });
           } catch {}
-          return Response.json({ ok: false, error: String(e?.message || e) }, { status: 200 });
+          return Response.json({ ok: false, error: "processing_error" }, { status: 200 });
         }
       },
     },
